@@ -9,12 +9,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -38,7 +37,7 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

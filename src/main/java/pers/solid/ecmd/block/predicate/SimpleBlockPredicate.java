@@ -13,12 +13,12 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyPredicate;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +84,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return List.of();
   }
 

@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -23,7 +24,7 @@ public interface ItemFunction extends ExpressionConvertible, RequiresValidation 
   ItemFunctionType<?> getType();
 
   @Override
-  default Iterable<? extends RequiresValidation> membersToValidate() {
+  default Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptySet();
   }
 }

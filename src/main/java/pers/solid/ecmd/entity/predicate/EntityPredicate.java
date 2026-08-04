@@ -11,10 +11,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -26,7 +29,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.advancements.critereon.EntityPredicate
  * @see net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition
  */
-public interface EntityPredicate extends ExpressionConvertible {
+public interface EntityPredicate extends ExpressionConvertible, RequiresValidation {
   Codec<EntityPredicate> CODEC = EntityPredicateType.CODEC.dispatch(EntityPredicate::getType, EntityPredicateType::codec);
   ResourceKey<Registry<EntityPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate"));
 
@@ -136,4 +139,9 @@ public interface EntityPredicate extends ExpressionConvertible {
   TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException;
 
   EntityPredicateType<?> getType();
+
+  @Override
+  default Iterable<? extends @Nullable Object> membersToValidate() {
+    return Collections.emptyList();
+  }
 }

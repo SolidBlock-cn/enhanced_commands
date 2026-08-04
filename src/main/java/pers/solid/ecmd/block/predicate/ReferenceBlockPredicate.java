@@ -2,15 +2,13 @@ package pers.solid.ecmd.block.predicate;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
-public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
+public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference) implements BlockPredicate, ReferenceEntry<BlockPredicate> {
   public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(DefaultNamespace.MINECRAFT.idCodec(true), BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
@@ -27,11 +25,6 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference
   @Override
   public String expressAsString() {
     return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
-  }
-
-  @Override
-  public ResourceKey<? extends Registry<BlockPredicate>> registryKey() {
-    return BlockPredicate.REGISTRY_KEY;
   }
 
   public static class ReferencePrefixedParser extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> {

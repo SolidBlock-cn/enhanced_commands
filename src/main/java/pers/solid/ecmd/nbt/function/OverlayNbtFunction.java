@@ -11,12 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunction {
+public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunction, RequiresValidation {
   public static final MapCodec<OverlayNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayNbtFunction::functions)
   ).apply(i, OverlayNbtFunction::new));
@@ -41,6 +42,11 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
       throw EMPTY_ERROR.create();
     }
     return nbtElement;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return functions;
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OverlayNbtFunction> {

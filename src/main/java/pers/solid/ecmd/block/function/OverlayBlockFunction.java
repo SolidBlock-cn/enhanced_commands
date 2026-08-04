@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return functions;
   }
 

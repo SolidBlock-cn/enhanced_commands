@@ -19,7 +19,6 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -58,8 +57,8 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
-    return List.of(); // add nbtPredicate
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(nbtPredicate);
   }
 
   public enum NbtParser implements Parser<NbtBlockPredicate> {

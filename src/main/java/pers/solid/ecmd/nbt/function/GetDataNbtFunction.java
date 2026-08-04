@@ -16,11 +16,13 @@ import pers.solid.ecmd.nbt.data.NbtSource;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
+public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction, RequiresValidation {
   public static final MapCodec<GetDataNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtSource.CODEC.fieldOf("source").forGetter(GetDataNbtFunction::source),
       NbtPathArgument.NbtPath.CODEC.optionalFieldOf("path").forGetter(GetDataNbtFunction::path),
@@ -40,6 +42,11 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return source.getConcentratedNbts((CommandSourceStack) context.positionProvider, path.orElse(null), concentrationType, RandomSource.create());
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(source);
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<GetDataNbtFunction> {

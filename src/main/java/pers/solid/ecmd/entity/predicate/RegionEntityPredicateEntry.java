@@ -4,10 +4,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+
+import java.util.List;
 
 public record RegionEntityPredicateEntry(RegionProvider<?> region) implements EntityPredicateEntry {
   public static final MapCodec<RegionEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -37,5 +40,10 @@ public record RegionEntityPredicateEntry(RegionProvider<?> region) implements En
   @Override
   public EntityPredicateType<RegionEntityPredicateEntry> getType() {
     return EntityPredicateTypes.REGION;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(region);
   }
 }

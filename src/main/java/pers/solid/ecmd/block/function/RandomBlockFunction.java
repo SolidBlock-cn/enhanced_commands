@@ -23,7 +23,6 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -101,7 +100,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

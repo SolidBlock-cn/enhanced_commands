@@ -17,6 +17,8 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.EnhancedServerReloadableRegistries;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 import pers.solid.ecmd.util.pack.RequiresValidation;
+import pers.solid.ecmd.util.pack.ValidationContext;
+import pers.solid.ecmd.util.pack.names.RootValidationName;
 
 import java.util.List;
 import java.util.Map;
@@ -40,14 +42,14 @@ public class ReloadableServerRegistriesMixin {
   @Inject(method = "apply", at = @At("RETURN"))
   private static void appendMoreValidation(LayeredRegistryAccess<RegistryLayer> registryAccess, List<WritableRegistry<?>> registries, CallbackInfoReturnable<LayeredRegistryAccess<RegistryLayer>> cir, @Local RegistryAccess.Frozen frozen) {
     final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> map = EnhancedServerReloadableRegistries.getRegistry();
-    RequiresValidation.Context context = new RequiresValidation.Context(frozen.asGetterLookup());
+    ValidationContext context = new ValidationContext(RootValidationName.INSTANCE, frozen.asGetterLookup());
 
     map.forEach((resourceKey, info) -> {
       final HolderLookup.RegistryLookup<?> registryLookup = frozen.lookupOrThrow(resourceKey);
       registryLookup.listElements().forEach(entry -> {
         if (entry.value() instanceof RequiresValidation r && !context.isElementReferenced(entry.key())) {
           EnhancedCommands.LOGGER.debug("Validating {} of registry {}", entry.key().location(), entry.key().registry());
-          r.validate(context);
+          r.validate(context.forResource(resourceKey));
         }
       });
     });

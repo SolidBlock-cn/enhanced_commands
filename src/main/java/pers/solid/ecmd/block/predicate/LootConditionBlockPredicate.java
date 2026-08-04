@@ -26,7 +26,6 @@ import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.bridge.LootBridge;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +53,8 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
-    return List.of();
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(entry);
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<LootConditionBlockPredicate> {

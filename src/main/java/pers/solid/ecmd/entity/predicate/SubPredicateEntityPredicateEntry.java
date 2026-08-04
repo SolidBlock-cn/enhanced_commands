@@ -6,10 +6,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>此实体谓词用于要求实体选择器同时符合另一个或者不符合另一个指定的谓词。例如：
@@ -59,5 +61,10 @@ public record SubPredicateEntityPredicateEntry(EntityPredicate predicate, boolea
   @Override
   public EntityPredicateType<SubPredicateEntityPredicateEntry> getType() {
     return EntityPredicateTypes.SUB_PREDICATE;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(predicate);
   }
 }

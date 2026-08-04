@@ -2,6 +2,7 @@ package pers.solid.ecmd.nbt.predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -100,6 +101,11 @@ public record MatchCompoundNbtPredicate(List<Entry> entries) implements NbtPredi
   @Override
   public NbtPredicateType<MatchCompoundNbtPredicate> getType() {
     return NbtPredicateTypes.MATCH_COMPOUND;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Lists.transform(entries, Entry::value);
   }
 
   public record Entry(@Nullable String key, NbtPredicate value) {

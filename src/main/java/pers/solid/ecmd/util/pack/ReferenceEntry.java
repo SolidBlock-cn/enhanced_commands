@@ -18,13 +18,16 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
+import pers.solid.ecmd.util.pack.problems.EntryAbsentValidationProblem;
+import pers.solid.ecmd.util.pack.problems.RecursiveReferenceProblem;
+import pers.solid.ecmd.util.pack.problems.RegistryAbsentValidationProblem;
+import pers.solid.ecmd.util.pack.problems.ValidationProblem;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -38,14 +41,16 @@ import java.util.function.Function;
  * @param <T> 该 reference 类自身所代表的类型
  * @param <E> 可数据驱动对象的类型
  */
-public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> extends RequiresValidation {
-  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(Codec<ResourceLocation> idCodec, ResourceKey<Registry<E>> registryKey, Function<Holder.Reference<E>, T> function) {
+public interface ReferenceEntry<E> extends RequiresValidation {
+  static <T extends ReferenceEntry<E>, E> MapCodec<T> createCodec(Codec<ResourceLocation> idCodec, ResourceKey<Registry<E>> registryKey, Function<Holder.Reference<E>, T> function) {
     return RecordCodecBuilder.mapCodec(i -> i.group(SafeReference.codec(idCodec, registryKey).fieldOf("reference").forGetter(ReferenceEntry::reference)).apply(i, function));
   }
 
-  ResourceKey<? extends Registry<E>> registryKey();
-
   Holder.Reference<E> reference();
+
+  static <E> ReferenceEntry<E> of(Holder.Reference<E> reference) {
+    return () -> reference;
+  }
 
   /**
    * 用于解析“$ + ID”形式的语法，并将其转化为 ReferenceEntry 的对象，在解析过程中，能自动提供关于 ID 的建议，并为不存在的 ID 报错。
@@ -155,41 +160,43 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> extends Requi
   }
 
   @Override
-  default Iterable<? extends RequiresValidation> membersToValidate() {
+  default Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 
   @Override
-  default boolean validate(Context context) {
+  default void validate(ValidationContext context) {
     final Holder.Reference<E> reference = reference();
     if (!context.isElementReferenced(reference.key())) {
-      final Context newContext = context.withOtherReferencedElement(reference.key());
+      final ValidationContext newContext = context.forReferencedElement(reference.key());
       final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
       if (optionalLookup.isEmpty()) {
-        EnhancedCommands.LOGGER.warn("Validation failed: registry {} does not exist", reference.key().location());
-        return false;
+        context.recordProblem(new RegistryAbsentValidationProblem<>(reference.key().registryKey()));
+        return;
       }
       final Optional<Holder.Reference<E>> optionalReference = optionalLookup.get().get(reference.key());
       if (optionalReference.isEmpty()) {
-        EnhancedCommands.LOGGER.warn("Validation failed: {} does not exist in the registry {}", reference.key().location(), reference.key().location());
-        return false;
+        context.recordProblem(new EntryAbsentValidationProblem<>(reference.key()));
       } else {
         if (optionalReference.get().value() instanceof RequiresValidation r) {
-          if (!r.validate(newContext)) {
+          r.validate(newContext);
+          if (newContext.hasProblems()) {
             if (reference instanceof LazyReference<E> lazy) {
-              lazy.setInvalid(true);
+              lazy.setProblem(ValidationProblem.concentrateMultiple(newContext.problems()));
             }
-            return false;
           }
         }
         if (reference instanceof LazyReference<E> lazy) {
           lazy.bindValue(optionalReference.get().value());
         }
-        return true;
       }
     } else {
-      EnhancedCommands.LOGGER.warn("Validation failed: {} in the registry {} is referenced recursively", reference.key().location(), reference.key().registry());
-      return false;
+      final RecursiveReferenceProblem<E> problem = new RecursiveReferenceProblem<>(reference.key());
+      context.recordProblem(problem);
+
+      if (reference instanceof LazyReference<E> lazy) {
+        lazy.setProblem(problem);
+      }
     }
   }
 }

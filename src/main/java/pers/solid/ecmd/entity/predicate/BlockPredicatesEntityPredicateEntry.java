@@ -1,6 +1,7 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -8,6 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -59,5 +61,10 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedCoordinates,
   @Override
   public String toOptionEntry() {
     return "block=" + predicates.stream().map(entry -> entry.getFirst().expressAsString() + " = " + entry.getSecond().expressAsString()).collect(Collectors.joining(", ", "{", "}"));
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Lists.transform(predicates, Pair::getSecond);
   }
 }

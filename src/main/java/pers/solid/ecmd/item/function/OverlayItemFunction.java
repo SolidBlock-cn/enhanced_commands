@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -39,7 +40,7 @@ public record OverlayItemFunction(List<ItemFunction> functions) implements ItemF
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return functions;
   }
 

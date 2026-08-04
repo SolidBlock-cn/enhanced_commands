@@ -13,12 +13,14 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.LootBridge;
 
+import java.util.List;
 import java.util.Optional;
 
 public record LootTablePredicateEntityPredicateEntry(Holder<LootItemCondition> predicate, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
@@ -98,5 +100,10 @@ public record LootTablePredicateEntityPredicateEntry(Holder<LootItemCondition> p
   @Override
   public String toOptionEntry() {
     return "predicate=" + (inverted ? "!" : "") + predicate.unwrapKey().map(registryKey -> registryKey.location().toString()).orElseGet(() -> LootItemCondition.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, predicate.value()).getOrThrow().toString());
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(predicate);
   }
 }

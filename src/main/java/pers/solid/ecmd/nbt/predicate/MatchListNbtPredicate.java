@@ -1,9 +1,12 @@
 package pers.solid.ecmd.nbt.predicate;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.function.PositionalListEntry;
 
 import java.util.List;
@@ -81,5 +84,10 @@ public record MatchListNbtPredicate(List<NbtPredicate> values, List<PositionalLi
   @Override
   public NbtPredicateType<MatchListNbtPredicate> getType() {
     return NbtPredicateTypes.MATCH_LIST;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(values, Lists.transform(positionalValues, PositionalListEntry::value));
   }
 }

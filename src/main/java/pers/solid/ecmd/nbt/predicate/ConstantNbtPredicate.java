@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public enum ConstantNbtPredicate implements NbtPredicate {
   TRUE(true),
@@ -45,5 +48,10 @@ public enum ConstantNbtPredicate implements NbtPredicate {
 
   public static ConstantNbtPredicate of(boolean value) {
     return value ? TRUE : FALSE;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of();
   }
 }

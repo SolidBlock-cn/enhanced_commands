@@ -36,7 +36,7 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return functions;
   }
 

@@ -4,8 +4,11 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+
+import java.util.List;
 
 /**
  * 匹配一个 NBT 的值（除了列表等复杂类型）是否能够与一个值直接匹配，通常来说要求值相等，包括内容也是相等的。例如：
@@ -38,5 +41,10 @@ public record MatchPrimitiveNbtPredicate(Tag value) implements NbtPredicate {
   @Override
   public NbtPredicateType<MatchPrimitiveNbtPredicate> getType() {
     return NbtPredicateTypes.MATCH_PRIMITIVE;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of();
   }
 }

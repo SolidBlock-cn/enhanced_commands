@@ -8,8 +8,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+
+import java.util.List;
 
 public record EffectEntityPredicateEntry(Holder<MobEffect> effect, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<EffectEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -48,5 +51,10 @@ public record EffectEntityPredicateEntry(Holder<MobEffect> effect, boolean inver
   @Override
   public String toOptionEntry() {
     return "effect=" + (inverted ? "!" : "") + effect.getRegisteredName();
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(effect);
   }
 }

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StateUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -74,7 +73,7 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return List.of(function);
   }
 

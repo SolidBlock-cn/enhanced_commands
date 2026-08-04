@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 
@@ -47,7 +46,7 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.singleton(function);
   }
 

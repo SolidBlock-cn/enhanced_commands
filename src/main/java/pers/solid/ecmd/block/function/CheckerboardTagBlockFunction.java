@@ -20,7 +20,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -111,7 +110,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

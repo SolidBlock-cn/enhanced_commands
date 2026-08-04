@@ -18,7 +18,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,7 +73,7 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return List.of();
   }
 

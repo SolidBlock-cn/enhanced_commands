@@ -13,10 +13,11 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.function.Predicate;
 
-public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag> {
+public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag>, RequiresValidation {
   Codec<NbtPredicate> CODEC = NbtPredicateType.CODEC.dispatch(NbtPredicate::getType, NbtPredicateType::codec);
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 

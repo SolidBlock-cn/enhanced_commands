@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -43,5 +44,10 @@ public record EqualsListNbtPredicate(List<NbtPredicate> values) implements NbtPr
   @Override
   public NbtPredicateType<EqualsListNbtPredicate> getType() {
     return NbtPredicateTypes.EQUALS_LIST;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return values;
   }
 }

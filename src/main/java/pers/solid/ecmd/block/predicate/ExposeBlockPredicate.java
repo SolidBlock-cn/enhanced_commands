@@ -21,7 +21,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.*;
 
@@ -74,7 +73,7 @@ public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> di
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

@@ -1,12 +1,16 @@
 package pers.solid.ecmd.nbt.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.function.Function;
@@ -35,7 +39,7 @@ import java.util.stream.Stream;
  * @param valueReplacements   需要被替换的元素列表。当此列表不是空，或者当 {@link #positionalFunctions} 为空时，会先清空原有列表，并直接替换为此列表的内容。
  * @param positionalFunctions 需要插入的元素及其对应索引的列表。
  */
-public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<PositionalListEntry<NbtFunction>> positionalFunctions) implements ListNbtFunction {
+public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<PositionalListEntry<NbtFunction>> positionalFunctions) implements ListNbtFunction, RequiresValidation {
   public static final MapCodec<ListOpsNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.list(NbtFunction.CODEC).optionalFieldOf("value_replacements", ImmutableList.of()).forGetter(ListOpsNbtFunction::valueReplacements),
       PositionalListEntry.codec(NbtFunction.CODEC).listOf().optionalFieldOf("positional_functions", ImmutableList.of()).forGetter(ListOpsNbtFunction::positionalFunctions)
@@ -89,5 +93,10 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
       }
     }
     return listTag;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(valueReplacements, Lists.transform(positionalFunctions, PositionalListEntry::value));
   }
 }

@@ -5,9 +5,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+
+import java.util.List;
 
 /**
  * 匹配一个 NBT 数值是否在数值上与指定的值相等，而不考虑其类型。例如：
@@ -63,5 +66,10 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag value) implement
   @Override
   public NbtPredicateType<ComparisonNbtPredicate> getType() {
     return NbtPredicateTypes.COMPARISON;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of();
   }
 }

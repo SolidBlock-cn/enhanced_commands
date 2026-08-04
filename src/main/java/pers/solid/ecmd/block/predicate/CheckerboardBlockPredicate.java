@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -14,7 +15,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -61,7 +61,7 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return predicates;
   }
 
