@@ -1,0 +1,10 @@
+{
+  "type": "enchant",
+  "modifications": [
+    {
+      "type": "add",
+      "enchantment": "all",
+      "level": "random_possible"
+    }
+  ]
+}

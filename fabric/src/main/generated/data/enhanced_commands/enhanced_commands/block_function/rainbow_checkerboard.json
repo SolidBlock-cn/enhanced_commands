@@ -1,6 +1,6 @@
 {
-  "type": "enhanced_commands:checkerboard",
-  "predicates": {
+  "type": "checkerboard",
+  "functions": {
     "elements": [
       "minecraft:red_concrete",
       "minecraft:orange_concrete",

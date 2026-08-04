@@ -1,0 +1,6 @@
+// 1.21.4	-999999999-01-01T00:00:00	Enhanced Commands/Item Functions (Enhanced Commands)
+3b53ed31cb61a8de02d38a3d0228e736f6199f03 data/enhanced_commands/enhanced_commands/item_function/enchant_randomly.json
+8ac521a464f2fa9a76785440d43082f8101b2014 data/enhanced_commands/enhanced_commands/item_function/mess_enchant.json
+0517f98a54e353ba2f87d749cbf4a078da83163a data/enhanced_commands/enhanced_commands/item_function/super_everything_enchant.json
+ba4f9a5a8ea8fbe1e9d2f5cb18a3d3f743f8f76f data/enhanced_commands/enhanced_commands/item_function/super_extreme_enchant.json
+ca1cc33ab14568a0c773e14713df9f5c53929d6a data/enhanced_commands/enhanced_commands/item_function/super_reasonable_enchant.json

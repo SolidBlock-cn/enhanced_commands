@@ -1,15 +1,15 @@
 {
-  "type": "enhanced_commands:conditions",
+  "type": "conditions",
   "conditions": [
     {
       "condition": "#enhanced_commands:natualize_ignore",
       "then": {
-        "type": "enhanced_commands:empty"
+        "type": "empty"
       }
     },
     {
       "condition": {
-        "type": "enhanced_commands:horizontal_offset",
+        "type": "horizontal_offset",
         "block_predicate": "#enhanced_commands:natualize_ignore",
         "offset": 2
       },
@@ -17,20 +17,20 @@
     },
     {
       "condition": {
-        "type": "enhanced_commands:any",
+        "type": "any",
         "predicates": [
           {
-            "type": "enhanced_commands:horizontal_offset",
+            "type": "horizontal_offset",
             "block_predicate": "#enhanced_commands:natualize_ignore",
             "offset": 3
           },
           {
-            "type": "enhanced_commands:horizontal_offset",
+            "type": "horizontal_offset",
             "block_predicate": "#enhanced_commands:natualize_ignore",
             "offset": 4
           },
           {
-            "type": "enhanced_commands:horizontal_offset",
+            "type": "horizontal_offset",
             "block_predicate": "#enhanced_commands:natualize_ignore",
             "offset": 5
           }
@@ -40,7 +40,7 @@
     },
     {
       "condition": {
-        "type": "enhanced_commands:any",
+        "type": "any",
         "predicates": [
           "#c:ores",
           "minecraft:stone"
@@ -48,7 +48,7 @@
       },
       "else": "minecraft:stone",
       "then": {
-        "type": "enhanced_commands:empty"
+        "type": "empty"
       }
     }
   ]

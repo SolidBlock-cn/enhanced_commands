@@ -1,5 +1,5 @@
 {
-  "type": "enhanced_commands:properties_nbt_combination",
+  "type": "properties_nbt_combination",
   "base": "#enhanced_commands:white_colors",
   "properties": [
     {

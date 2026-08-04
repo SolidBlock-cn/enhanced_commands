@@ -1,22 +1,22 @@
 {
-  "type": "enhanced_commands:overlay",
+  "type": "overlay",
   "functions": [
     {
-      "type": "enhanced_commands:reference",
-      "id": "enhanced_commands:naturalize_vegetation"
+      "type": "reference",
+      "reference": "naturalize_vegetation"
     },
     {
-      "type": "enhanced_commands:conditions",
+      "type": "conditions",
       "conditions": [
         {
           "condition": "#enhanced_commands:natualize_ignore",
           "then": {
-            "type": "enhanced_commands:empty"
+            "type": "empty"
           }
         },
         {
           "condition": {
-            "type": "enhanced_commands:horizontal_offset",
+            "type": "horizontal_offset",
             "block_predicate": "#enhanced_commands:natualize_ignore",
             "offset": 1
           },
@@ -24,20 +24,20 @@
         },
         {
           "condition": {
-            "type": "enhanced_commands:any",
+            "type": "any",
             "predicates": [
               {
-                "type": "enhanced_commands:horizontal_offset",
+                "type": "horizontal_offset",
                 "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 2
               },
               {
-                "type": "enhanced_commands:horizontal_offset",
+                "type": "horizontal_offset",
                 "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 3
               },
               {
-                "type": "enhanced_commands:horizontal_offset",
+                "type": "horizontal_offset",
                 "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 4
               }
@@ -47,7 +47,7 @@
         },
         {
           "condition": {
-            "type": "enhanced_commands:any",
+            "type": "any",
             "predicates": [
               "#c:ores",
               "minecraft:stone"
@@ -55,7 +55,7 @@
           },
           "else": "minecraft:stone",
           "then": {
-            "type": "enhanced_commands:empty"
+            "type": "empty"
           }
         }
       ]

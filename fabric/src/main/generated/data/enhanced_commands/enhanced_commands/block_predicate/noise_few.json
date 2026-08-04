@@ -1,15 +1,15 @@
 {
-  "type": "enhanced_commands:noise",
+  "type": "noise",
   "list": {
     "entries": [
       {
         "element": {
-          "type": "enhanced_commands:constant"
+          "type": "constant"
         }
       },
       {
         "element": {
-          "type": "enhanced_commands:constant",
+          "type": "constant",
           "value": false
         },
         "weight": 5.0

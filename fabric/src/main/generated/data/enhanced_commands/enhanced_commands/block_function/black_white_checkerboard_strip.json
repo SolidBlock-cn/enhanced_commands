@@ -1,11 +1,11 @@
 {
-  "type": "enhanced_commands:checkerboard",
+  "type": "checkerboard",
   "floor": [
     1.0,
     1.0,
     1.0
   ],
-  "predicates": {
+  "functions": {
     "elements": [
       "minecraft:white_concrete",
       "minecraft:black_concrete"

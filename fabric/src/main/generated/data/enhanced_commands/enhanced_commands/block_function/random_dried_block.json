@@ -1,6 +1,6 @@
 {
-  "type": "enhanced_commands:dry",
+  "type": "dry",
   "function": {
-    "type": "enhanced_commands:random"
+    "type": "random"
   }
 }

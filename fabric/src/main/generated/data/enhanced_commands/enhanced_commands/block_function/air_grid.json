@@ -1,20 +1,20 @@
 {
-  "type": "enhanced_commands:checkerboard",
-  "predicates": {
+  "type": "checkerboard",
+  "functions": {
     "elements": [
       "minecraft:air",
       {
-        "type": "enhanced_commands:checkerboard",
-        "predicates": {
+        "type": "checkerboard",
+        "functions": {
           "elements": [
             "minecraft:air",
             {
-              "type": "enhanced_commands:checkerboard",
-              "predicates": {
+              "type": "checkerboard",
+              "functions": {
                 "elements": [
                   "minecraft:air",
                   {
-                    "type": "enhanced_commands:empty"
+                    "type": "empty"
                   }
                 ],
                 "weighted": false
