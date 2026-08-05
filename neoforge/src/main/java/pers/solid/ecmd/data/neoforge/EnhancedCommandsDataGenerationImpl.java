@@ -10,6 +10,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
+import pers.solid.ecmd.data.*;
 import pers.solid.ecmd.item.function.ItemFunction;
 import pers.solid.ecmd.item.predicate.ItemPredicate;
 
@@ -26,11 +27,14 @@ public class EnhancedCommandsDataGenerationImpl {
     event.getGenerator().addProvider(event.includeServer(), new BlockTagDataGeneratorImpl(output, lookupProvider, existingFileHelper));
 
     event.createDatapackRegistryObjects(new RegistrySetBuilder()
-            .add(BlockFunction.REGISTRY_KEY, new BlockFunctionDataGenerationImpl()::configureBridge)
-            .add(BlockPredicate.REGISTRY_KEY, new BlockPredicateDataGenerationImpl()::configureBridge)
-            .add(ItemFunction.REGISTRY_KEY, new ItemFunctionDataGenerationImpl()::configureBridge)
-            .add(ItemPredicate.REGISTRY_KEY, new ItemPredicateDataGenerationImpl()::configureBridge),
+            .add(BlockFunction.REGISTRY_KEY, registryBootstrapFor(new BlockFunctionDataGeneration()))
+            .add(BlockPredicate.REGISTRY_KEY, registryBootstrapFor(new BlockPredicateDataGeneration()))
+            .add(ItemFunction.REGISTRY_KEY, registryBootstrapFor(new ItemFunctionDataGeneration()))
+            .add(ItemPredicate.REGISTRY_KEY, registryBootstrapFor(new ItemPredicateDataGeneration())),
         Set.of(EnhancedCommands.MOD_ID));
+  }
 
+  private static <T> RegistrySetBuilder.RegistryBootstrap<T> registryBootstrapFor(DynamicRegistryGenerationBridge<T> bridge) {
+    return arg -> bridge.configureBridge(new DynamicRegistryGenerationBridgeImpl.NeoForgeContext<>(arg));
   }
 }

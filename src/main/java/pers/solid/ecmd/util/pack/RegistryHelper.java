@@ -2,7 +2,9 @@ package pers.solid.ecmd.util.pack;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
+import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 
 public final class RegistryHelper {
   private RegistryHelper() {
@@ -31,6 +33,11 @@ public final class RegistryHelper {
   @SuppressWarnings("unchecked")
   public static <T> HolderOwner<T> safeHolderOwner() {
     return (HolderOwner<T>) SafeHolderOwner.VALUE;
+  }
+
+  @SuppressWarnings("deprecation")
+  public static <T> HolderSet<T> emptyNamedSet(TagKey<T> tagKey) {
+    return HolderSet.emptyNamed(safeHolderOwner(), tagKey);
   }
 
   public enum SafeHolderOwner implements HolderOwner<Object> {

@@ -13,13 +13,18 @@ import pers.solid.ecmd.item.function.ItemFunction;
 import java.util.List;
 import java.util.Optional;
 
-public interface ItemFunctionDataGeneration extends DynamicRegistryGenerationBridge<ItemFunction> {
+public class ItemFunctionDataGeneration implements DynamicRegistryGenerationBridge<ItemFunction> {
   static ResourceKey<ItemFunction> of(String value) {
     return ResourceKey.create(ItemFunction.REGISTRY_KEY, EnhancedCommands.id(value));
   }
 
   @Override
-  default void configureBridge(ContextBridge<ItemFunction> context) {
+  public String getBridgeName() {
+    return "Item Functions (Enhanced Commands)";
+  }
+
+  @Override
+  public void configureBridge(ContextBridge<ItemFunction> context) {
     context.add(of("enchant_randomly"), new EnchantItemFunction(List.of(new NaturalEnchantmentsFunction(ConstantValue.exactly(30), Optional.empty()))));
     context.add(of("super_reasonable_enchant"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
         EnchantmentModificationTarget.Special.ALL_SUPPORTED,

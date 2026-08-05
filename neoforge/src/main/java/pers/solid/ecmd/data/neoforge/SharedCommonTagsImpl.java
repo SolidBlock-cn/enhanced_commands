@@ -3,12 +3,18 @@ package pers.solid.ecmd.data.neoforge;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
-import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.data.BlockFunctionDataGeneration;
+import org.jetbrains.annotations.ApiStatus;
 
-public class BlockFunctionDataGenerationImpl implements BlockFunctionDataGeneration, DynamicRegistryGenerationBridgeImpl<BlockFunction> {
+@ApiStatus.Internal
+public class SharedCommonTagsImpl {
+  private SharedCommonTagsImpl() {
+  }
 
   public static TagKey<Block> oresConventionalTag() {
     return Tags.Blocks.ORES;
+  }
+
+  public static TagKey<Block> conventionalBudsTag() {
+    return Tags.Blocks.BUDS;
   }
 }
