@@ -11,13 +11,18 @@ import pers.solid.ecmd.item.predicate.SimpleItemPredicate;
 
 import java.util.List;
 
-public interface ItemPredicateDataGeneration extends DynamicRegistryGenerationBridge<ItemPredicate> {
+public class ItemPredicateDataGeneration implements DynamicRegistryGenerationBridge<ItemPredicate> {
   static ResourceKey<ItemPredicate> of(String value) {
     return ResourceKey.create(ItemPredicate.REGISTRY_KEY, EnhancedCommands.id(value));
   }
 
   @Override
-  default void configureBridge(ContextBridge<ItemPredicate> context) {
+  public String getBridgeName() {
+    return "Item Predicates (Enhanced Commands)";
+  }
+
+  @Override
+  public void configureBridge(ContextBridge<ItemPredicate> context) {
     context.add(of("diamond_or_emerald"), new AnyItemPredicate(List.of(new SimpleItemPredicate(Items.DIAMOND), new SimpleItemPredicate(Items.EMERALD))));
     context.add(of("diamonds"), new AnyItemPredicate(List.of(new SimpleItemPredicate(Items.DIAMOND), new SimpleItemPredicate(Items.DIAMOND_BLOCK))));
 //    context.add(of("fire_resistant"), new ComponentPresenceItemPredicate<>(DataComponents.FIRE_RESISTANT)); todo 转化为符合新版本的谓词

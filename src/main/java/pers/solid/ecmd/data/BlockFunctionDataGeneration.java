@@ -1,13 +1,11 @@
 package pers.solid.ecmd.data;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -38,9 +36,9 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
-import static pers.solid.ecmd.data.DynamicRegistryGenerationBridge.emptyNamedSet;
+import static pers.solid.ecmd.util.pack.RegistryHelper.emptyNamedSet;
 
-public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBridge<BlockFunction> {
+public class BlockFunctionDataGeneration implements DynamicRegistryGenerationBridge<BlockFunction> {
   static ResourceKey<BlockFunction> of(String value) {
     return ResourceKey.create(BlockFunction.REGISTRY_KEY, EnhancedCommands.id(value));
   }
@@ -50,7 +48,12 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
   }
 
   @Override
-  default void configureBridge(ContextBridge<BlockFunction> context) {
+  public String getBridgeName() {
+    return "Block Functions (Enhanced Commands)";
+  }
+
+  @Override
+  public void configureBridge(ContextBridge<BlockFunction> context) {
     context.add(of("black_white_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE)));
     context.add(of("black_white_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), new Vec3(4, 4, 4), Checkerboard.UNIT, Checkerboard.UNIT));
     context.add(of("black_white_checkerboard_strip"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), Checkerboard.UNIT, new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
@@ -115,7 +118,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.GRASS_BLOCK)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(SharedCommonTags.oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -131,7 +134,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.MYCELIUM)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(SharedCommonTags.oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -152,7 +155,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                     new HorizontalOffsetBlockPredicate(5, naturalizeIgnore)),
                 new SimpleBlockFunction(Blocks.SANDSTONE)),
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(SharedCommonTags.oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -268,8 +271,4 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("heavily_worn_deepslate_bricks"), new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new SimpleBlockFunction(Blocks.DEEPSLATE_BRICKS), 0.2), ObjectDoublePair.of(new SimpleBlockFunction(Blocks.CRACKED_DEEPSLATE_BRICKS), 0.8))));
   }
 
-  @ExpectPlatform
-  private static TagKey<Block> oresConventionalTag() {
-    throw new AssertionError();
-  }
 }

@@ -1,11 +1,8 @@
 package pers.solid.ecmd.data;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
@@ -18,22 +15,23 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
-import static pers.solid.ecmd.data.DynamicRegistryGenerationBridge.emptyNamedSet;
+import static pers.solid.ecmd.util.pack.RegistryHelper.emptyNamedSet;
 
-public interface BlockPredicateDataGeneration extends DynamicRegistryGenerationBridge<BlockPredicate> {
-  @ExpectPlatform
-  static TagKey<Block> conventionalBudsTag() {
-    throw new AssertionError();
+public class BlockPredicateDataGeneration implements DynamicRegistryGenerationBridge<BlockPredicate> {
+
+  @Override
+  public String getBridgeName() {
+    return "Block Predicates (Enhanced Commands)";
   }
 
   @Override
-  default void configureBridge(ContextBridge<BlockPredicate> context) {
+  public void configureBridge(ContextBridge<BlockPredicate> context) {
     context.add(of("natualize_placeable"), new AnyBlockPredicate(List.of(
         new TagBlockPredicate(emptyNamedSet(BlockTags.REPLACEABLE)),
         new TagBlockPredicate(emptyNamedSet(BlockTags.LEAVES)),
         new TagBlockPredicate(emptyNamedSet(BlockTags.WART_BLOCKS)),
         new TagBlockPredicate(emptyNamedSet(BlockTags.LOGS)),
-        new TagBlockPredicate(emptyNamedSet(conventionalBudsTag())),
+        new TagBlockPredicate(emptyNamedSet(SharedCommonTags.conventionalBudsTag())),
         new SimpleBlockPredicate(Blocks.GLOWSTONE)
     )));
     context.add(of("checkerboard"), new CheckerboardBlockPredicate(new WeightedList.Uniform<>(List.of(ConstantBlockPredicate.ALWAYS_TRUE, ConstantBlockPredicate.ALWAYS_FALSE))));
