@@ -8,11 +8,11 @@ import pers.solid.ecmd.api.RegistryBridge;
 public final class EnchantmentModificationTypes {
   private static final RegistryBridge<EnchantmentModificationType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EnchantmentModificationType.REGISTRY);
 
-  public static final EnchantmentModificationType<AddEnchantmentModification> ADD = register("add", AddEnchantmentModification.CODEC);
-  public static final EnchantmentModificationType<NaturalEnchantmentModification> NATURAL = register("natural", NaturalEnchantmentModification.CODEC);
-  public static final EnchantmentModificationType<RemoveEnchantmentModification> REMOVE = register("remove", RemoveEnchantmentModification.CODEC);
+  public static final EnchantmentModificationType<AddEnchantmentsFunction> ADD = register("add", AddEnchantmentsFunction.CODEC);
+  public static final EnchantmentModificationType<NaturalEnchantmentsFunction> NATURAL = register("natural", NaturalEnchantmentsFunction.CODEC);
+  public static final EnchantmentModificationType<RemoveEnchantmentsFunction> REMOVE = register("remove", RemoveEnchantmentsFunction.CODEC);
 
-  private static <T extends EnchantmentModification> EnchantmentModificationType<T> register(String name, MapCodec<T> codec) {
+  private static <T extends EnchantmentsFunction> EnchantmentModificationType<T> register(String name, MapCodec<T> codec) {
     return REGISTRY_BRIDGE.register(name, new EnchantmentModificationType.Simple<>(codec));
   }
 

@@ -32,11 +32,11 @@ import java.util.stream.Stream;
 /**
  * @see EnchantmentHelper#selectEnchantment(RandomSource, ItemStack, int, Stream)
  */
-public record NaturalEnchantmentModification(NumberProvider level, Optional<HolderSet<Enchantment>> possibleValues) implements EnchantmentModification {
-  public static final MapCodec<NaturalEnchantmentModification> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      NumberProviders.CODEC.fieldOf("level").forGetter(NaturalEnchantmentModification::level),
-      RegistryCodecs.homogeneousList(Registries.ENCHANTMENT).optionalFieldOf("possible_values").forGetter(NaturalEnchantmentModification::possibleValues)
-  ).apply(i, NaturalEnchantmentModification::new));
+public record NaturalEnchantmentsFunction(NumberProvider level, Optional<HolderSet<Enchantment>> possibleValues) implements EnchantmentsFunction {
+  public static final MapCodec<NaturalEnchantmentsFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      NumberProviders.CODEC.fieldOf("level").forGetter(NaturalEnchantmentsFunction::level),
+      RegistryCodecs.homogeneousList(Registries.ENCHANTMENT).optionalFieldOf("possible_values").forGetter(NaturalEnchantmentsFunction::possibleValues)
+  ).apply(i, NaturalEnchantmentsFunction::new));
 
   @Override
   public void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
@@ -47,14 +47,14 @@ public record NaturalEnchantmentModification(NumberProvider level, Optional<Hold
   }
 
   @Override
-  public EnchantmentModificationType<NaturalEnchantmentModification> getType() {
+  public EnchantmentModificationType<NaturalEnchantmentsFunction> getType() {
     return EnchantmentModificationTypes.NATURAL;
   }
 
   /**
    * 解析关键字 {@code natural} 及空格之后的内容。在运行此方法时，指针已经在关键字 {@code natural} 及空格之后。
    */
-  public static <S> NaturalEnchantmentModification parseAfterKeyword(ParseContext<S> parseContext) throws CommandSyntaxException {
+  public static <S> NaturalEnchantmentsFunction parseAfterKeyword(ParseContext<S> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final NumberProvider level = NumberProviderParser.parse(parseContext);
     final int cursorAfterLevel = reader.getCursor();
@@ -63,14 +63,14 @@ public record NaturalEnchantmentModification(NumberProvider level, Optional<Hold
     parseContext.setSuggestion((context, builder) -> EnchantmentModificationTargetParser.suggestEnchantmentOrTag(builder, lookup));
     if (reader.canRead() && (ResourceLocation.isAllowedInResourceLocation(reader.peek()) || reader.peek() == '#')) {
       final HolderSet<Enchantment> holders = EnchantmentModificationTargetParser.parseEnchantmentList(parseContext);
-      return new NaturalEnchantmentModification(level, Optional.of(holders));
+      return new NaturalEnchantmentsFunction(level, Optional.of(holders));
     } else {
       if (reader.getCursor() <= cursorAfterLevel) {
         // 没有隔着空格的话，不提供关于附魔的建议。
         parseContext.clearSuggestion();
       }
       reader.setCursor(cursorAfterLevel);
-      return new NaturalEnchantmentModification(level, Optional.empty());
+      return new NaturalEnchantmentsFunction(level, Optional.empty());
     }
   }
 
