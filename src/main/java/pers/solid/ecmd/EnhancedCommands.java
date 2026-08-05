@@ -21,8 +21,8 @@ import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
-import pers.solid.ecmd.enchantment.function.EnchantmentModification;
 import pers.solid.ecmd.enchantment.function.EnchantmentModificationTypes;
+import pers.solid.ecmd.enchantment.function.EnchantmentsFunction;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.entity.predicate.EntityPredicateTypes;
 import pers.solid.ecmd.entity.predicate.EntitySelectorOptionsExtension;
@@ -119,7 +119,7 @@ public class EnhancedCommands {
   private static void registerReloadableRegistries(InitializeContext context) {
     EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, false, context);
-    EnhancedServerReloadableRegistries.register(EnchantmentModification.REGISTRY_KEY, EnchantmentModification.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(EnchantmentsFunction.REGISTRY_KEY, EnchantmentsFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(EntityPredicate.REGISTRY_KEY, EntityPredicate.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(ItemFunction.REGISTRY_KEY, ItemFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(ItemPredicate.REGISTRY_KEY, ItemPredicate.CODEC, false, context);

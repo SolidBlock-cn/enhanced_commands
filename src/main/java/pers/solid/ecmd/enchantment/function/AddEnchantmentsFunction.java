@@ -18,14 +18,14 @@ import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 
-public record AddEnchantmentModification(EnchantmentModificationTarget enchantment, EnchantmentLevelProvider level, boolean supportedOnly, boolean clamp, boolean upgradeOnly) implements EnchantmentModification {
-  public static final MapCodec<AddEnchantmentModification> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      EnchantmentModificationTarget.CODEC.fieldOf("enchantment").forGetter(AddEnchantmentModification::enchantment),
-      EnchantmentLevelProvider.CODEC.fieldOf("level").forGetter(AddEnchantmentModification::level),
-      Codec.BOOL.optionalFieldOf("supported_only", false).forGetter(AddEnchantmentModification::supportedOnly),
-      Codec.BOOL.optionalFieldOf("clamp", false).forGetter(AddEnchantmentModification::clamp),
-      Codec.BOOL.optionalFieldOf("upgrade_only", false).forGetter(AddEnchantmentModification::upgradeOnly)
-  ).apply(i, AddEnchantmentModification::new));
+public record AddEnchantmentsFunction(EnchantmentModificationTarget enchantment, EnchantmentLevelProvider level, boolean supportedOnly, boolean clamp, boolean upgradeOnly) implements EnchantmentsFunction {
+  public static final MapCodec<AddEnchantmentsFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      EnchantmentModificationTarget.CODEC.fieldOf("enchantment").forGetter(AddEnchantmentsFunction::enchantment),
+      EnchantmentLevelProvider.CODEC.fieldOf("level").forGetter(AddEnchantmentsFunction::level),
+      Codec.BOOL.optionalFieldOf("supported_only", false).forGetter(AddEnchantmentsFunction::supportedOnly),
+      Codec.BOOL.optionalFieldOf("clamp", false).forGetter(AddEnchantmentsFunction::clamp),
+      Codec.BOOL.optionalFieldOf("upgrade_only", false).forGetter(AddEnchantmentsFunction::upgradeOnly)
+  ).apply(i, AddEnchantmentsFunction::new));
 
   @Override
   public void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
@@ -42,11 +42,11 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
   }
 
   @Override
-  public EnchantmentModificationType<AddEnchantmentModification> getType() {
+  public EnchantmentModificationType<AddEnchantmentsFunction> getType() {
     return EnchantmentModificationTypes.ADD;
   }
 
-  public static <S> AddEnchantmentModification parse(ParseContext<S> parseContext) throws CommandSyntaxException {
+  public static <S> AddEnchantmentsFunction parse(ParseContext<S> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final EnchantmentModificationTarget enchantment = EnchantmentModificationTargetParser.parse(parseContext);
     final int cursorAfterEnchantment = reader.getCursor();
@@ -62,7 +62,7 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
         if (!r) {
           reader.setCursor(cursorAfterEnchantment);
         }
-        return new AddEnchantmentModification(enchantment, new EnchantmentLevelProvider.Basic(ConstantValue.exactly(1)), supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
+        return new AddEnchantmentsFunction(enchantment, new EnchantmentLevelProvider.Basic(ConstantValue.exactly(1)), supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
       }
     }
     reader.setCursor(cursorAfterEnchantment);
@@ -72,7 +72,7 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
     parseContext.clearSuggestion();
     tryParseParameters(parseContext, reader, supportedOnly, clamp, upgradeOnly);
 
-    return new AddEnchantmentModification(enchantment, levelProvider, supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
+    return new AddEnchantmentsFunction(enchantment, levelProvider, supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
   }
 
   /**

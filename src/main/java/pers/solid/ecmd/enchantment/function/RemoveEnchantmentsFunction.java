@@ -9,10 +9,10 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 
-public record RemoveEnchantmentModification(EnchantmentModificationTarget enchantment) implements EnchantmentModification {
-  public static final MapCodec<RemoveEnchantmentModification> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      EnchantmentModificationTarget.CODEC.fieldOf("enchantment").forGetter(RemoveEnchantmentModification::enchantment)
-  ).apply(i, RemoveEnchantmentModification::new));
+public record RemoveEnchantmentsFunction(EnchantmentModificationTarget enchantment) implements EnchantmentsFunction {
+  public static final MapCodec<RemoveEnchantmentsFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      EnchantmentModificationTarget.CODEC.fieldOf("enchantment").forGetter(RemoveEnchantmentsFunction::enchantment)
+  ).apply(i, RemoveEnchantmentsFunction::new));
 
   @Override
   public void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
@@ -20,17 +20,17 @@ public record RemoveEnchantmentModification(EnchantmentModificationTarget enchan
   }
 
   @Override
-  public EnchantmentModificationType<RemoveEnchantmentModification> getType() {
+  public EnchantmentModificationType<RemoveEnchantmentsFunction> getType() {
     return EnchantmentModificationTypes.REMOVE;
   }
 
-  public static <S> RemoveEnchantmentModification parse(ParseContext<S> parseContext) throws CommandSyntaxException {
+  public static <S> RemoveEnchantmentsFunction parse(ParseContext<S> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     reader.expect('!');
     reader.skipWhitespace();
 
     final EnchantmentModificationTarget target = EnchantmentModificationTargetParser.parse(parseContext);
-    return new RemoveEnchantmentModification(target);
+    return new RemoveEnchantmentsFunction(target);
   }
 
   @Override

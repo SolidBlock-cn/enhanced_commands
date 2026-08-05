@@ -15,16 +15,16 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
-public interface EnchantmentModification extends ExpressionConvertible {
-  ResourceKey<Registry<EnchantmentModification>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("enchantment_modification"));
-  MapCodec<EnchantmentModification> MAP_CODEC = Codec.lazyInitialized(() -> EnchantmentModificationType.CODEC).dispatchMap(EnchantmentModification::getType, EnchantmentModificationType::codec);
-  Codec<EnchantmentModification> CODEC = MAP_CODEC.codec();
+public interface EnchantmentsFunction extends ExpressionConvertible {
+  ResourceKey<Registry<EnchantmentsFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("enchantments_function"));
+  MapCodec<EnchantmentsFunction> MAP_CODEC = Codec.lazyInitialized(() -> EnchantmentModificationType.CODEC).dispatchMap(EnchantmentsFunction::getType, EnchantmentModificationType::codec);
+  Codec<EnchantmentsFunction> CODEC = MAP_CODEC.codec();
 
   void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context);
 
   EnchantmentModificationType<?> getType();
 
-  static <S> EnchantmentModification parse(ParseContext<S> parseContext) throws CommandSyntaxException {
+  static <S> EnchantmentsFunction parse(ParseContext<S> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorStart = reader.getCursor();
     parseContext.addSuggestion((context, builder) -> {
@@ -36,18 +36,18 @@ public interface EnchantmentModification extends ExpressionConvertible {
 
     if (reader.canRead() && reader.peek() == '!') {
       parseContext.clearSuggestion();
-      return RemoveEnchantmentModification.parse(parseContext);
+      return RemoveEnchantmentsFunction.parse(parseContext);
     }
 
     final String unquotedString = reader.readUnquotedString();
     if ("natural".equals(unquotedString)) {
       parseContext.clearSuggestion();
       ParsingUtil.expectAndSkipWhitespace(reader);
-      return NaturalEnchantmentModification.parseAfterKeyword(parseContext);
+      return NaturalEnchantmentsFunction.parseAfterKeyword(parseContext);
     } else {
       reader.setCursor(cursorStart);
     }
 
-    return AddEnchantmentModification.parse(parseContext);
+    return AddEnchantmentsFunction.parse(parseContext);
   }
 }

@@ -7,7 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import pers.solid.ecmd.enchantment.function.EnchantmentModification;
+import pers.solid.ecmd.enchantment.function.EnchantmentsFunction;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -16,17 +16,17 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record EnchantItemFunction(List<EnchantmentModification> modifications) implements ItemFunction {
+public record EnchantItemFunction(List<EnchantmentsFunction> modifiers) implements ItemFunction {
   public static final MapCodec<EnchantItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      EnchantmentModification.CODEC.listOf().fieldOf("modifications").forGetter(EnchantItemFunction::modifications)
+      EnchantmentsFunction.CODEC.listOf().fieldOf("modifiers").forGetter(EnchantItemFunction::modifiers)
   ).apply(i, EnchantItemFunction::new));
 
   @Override
   public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     final ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
     final ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(enchantments);
-    for (EnchantmentModification modification : modifications) {
-      modification.modify(itemStack, mutable, context);
+    for (EnchantmentsFunction modifier : modifiers) {
+      modifier.modify(itemStack, mutable, context);
     }
     itemStack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
     return itemStack;
@@ -39,11 +39,11 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
 
   @Override
   public String expressAsString() {
-    return modifications.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "enchant(", ")"));
+    return modifiers.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "enchant(", ")"));
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<EnchantItemFunction> {
-    private final ImmutableList.Builder<EnchantmentModification> modifications = new ImmutableList.Builder<>();
+    private final ImmutableList.Builder<EnchantmentsFunction> modifications = new ImmutableList.Builder<>();
 
     @Override
     public EnchantItemFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -52,7 +52,7 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final EnchantmentModification parse = EnchantmentModification.parse(parseContext);
+      final EnchantmentsFunction parse = EnchantmentsFunction.parse(parseContext);
       modifications.add(parse);
     }
   }
