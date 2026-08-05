@@ -1,0 +1,45 @@
+{
+  "type": "checkerboard",
+  "functions": {
+    "elements": [
+      "minecraft:air",
+      {
+        "type": "checkerboard",
+        "functions": {
+          "elements": [
+            "minecraft:air",
+            {
+              "type": "checkerboard",
+              "functions": {
+                "elements": [
+                  "minecraft:air",
+                  {
+                    "type": "empty"
+                  }
+                ],
+                "weighted": false
+              },
+              "scale": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "weighted": false
+        },
+        "scale": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    ],
+    "weighted": false
+  },
+  "scale": [
+    0.0,
+    0.0,
+    1.0
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "type": "properties_nbt_combination",
+  "base": {
+    "type": "conditions",
+    "conditions": [
+      {
+        "condition": "#enhanced_commands:overlaid_dirt",
+        "then": "minecraft:crimson_nylium"
+      },
+      {
+        "condition": "#minecraft:dirt",
+        "then": "minecraft:netherrack"
+      },
+      {
+        "condition": "#minecraft:flowers",
+        "then": "minecraft:crimson_fungus"
+      },
+      {
+        "condition": {
+          "type": "any",
+          "predicates": [
+            "minecraft:short_grass",
+            "minecraft:fern",
+            {
+              "type": "simple",
+              "block": "minecraft:tall_grass",
+              "properties": [
+                {
+                  "type": "comparison",
+                  "comparator": "=",
+                  "property": "half",
+                  "value": "lower"
+                }
+              ]
+            }
+          ]
+        },
+        "then": "minecraft:crimson_roots"
+      },
+      {
+        "condition": "#minecraft:overworld_natural_logs",
+        "then": "minecraft:crimson_stem"
+      },
+      {
+        "condition": "#minecraft:leaves",
+        "then": "minecraft:nether_wart_block"
+      },
+      {
+        "condition": "#minecraft:sand",
+        "then": "minecraft:soul_sand"
+      }
+    ]
+  },
+  "properties": [
+    {
+      "type": "all_original"
+    }
+  ]
+}

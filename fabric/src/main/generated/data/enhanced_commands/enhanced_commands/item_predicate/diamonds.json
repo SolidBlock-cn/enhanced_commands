@@ -1,7 +1,0 @@
-{
-  "type": "any",
-  "predicates": [
-    "minecraft:diamond",
-    "minecraft:diamond_block"
-  ]
-}

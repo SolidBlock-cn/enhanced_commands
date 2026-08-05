@@ -1,0 +1,90 @@
+{
+  "type": "overlay",
+  "functions": [
+    {
+      "type": "reference",
+      "reference": "naturalize/vegetation_conversion"
+    },
+    {
+      "type": "conditions",
+      "conditions": [
+        {
+          "condition": "#enhanced_commands:naturalize_ignored",
+          "then": {
+            "type": "empty"
+          }
+        },
+        {
+          "condition": {
+            "type": "any",
+            "predicates": [
+              "minecraft:short_grass",
+              "minecraft:fern",
+              {
+                "type": "simple",
+                "block": "minecraft:tall_grass",
+                "properties": [
+                  {
+                    "type": "comparison",
+                    "comparator": "=",
+                    "property": "half",
+                    "value": "lower"
+                  }
+                ]
+              }
+            ]
+          },
+          "then": "minecraft:brown_mushroom"
+        },
+        {
+          "condition": "#minecraft:small_flowers",
+          "then": "minecraft:red_mushroom"
+        },
+        {
+          "condition": {
+            "type": "horizontal_offset",
+            "block_predicate": "#enhanced_commands:naturalize_ignored",
+            "offset": 1
+          },
+          "then": "minecraft:mycelium"
+        },
+        {
+          "condition": {
+            "type": "any",
+            "predicates": [
+              {
+                "type": "horizontal_offset",
+                "block_predicate": "#enhanced_commands:naturalize_ignored",
+                "offset": 2
+              },
+              {
+                "type": "horizontal_offset",
+                "block_predicate": "#enhanced_commands:naturalize_ignored",
+                "offset": 3
+              },
+              {
+                "type": "horizontal_offset",
+                "block_predicate": "#enhanced_commands:naturalize_ignored",
+                "offset": 4
+              }
+            ]
+          },
+          "then": "minecraft:dirt"
+        },
+        {
+          "condition": {
+            "type": "any",
+            "predicates": [
+              "#c:ores",
+              "minecraft:stone"
+            ]
+          },
+          "else": "minecraft:stone",
+          "then": {
+            "type": "empty"
+          }
+        }
+      ]
+    }
+  ]
+}

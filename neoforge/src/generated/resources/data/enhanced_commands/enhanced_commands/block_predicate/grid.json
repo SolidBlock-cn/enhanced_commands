@@ -1,26 +1,26 @@
 {
-  "type": "enhanced_commands:checkerboard",
+  "type": "checkerboard",
   "predicates": {
     "elements": [
       {
-        "type": "enhanced_commands:constant"
+        "type": "constant"
       },
       {
-        "type": "enhanced_commands:checkerboard",
+        "type": "checkerboard",
         "predicates": {
           "elements": [
             {
-              "type": "enhanced_commands:constant"
+              "type": "constant"
             },
             {
-              "type": "enhanced_commands:checkerboard",
+              "type": "checkerboard",
               "predicates": {
                 "elements": [
                   {
-                    "type": "enhanced_commands:constant"
+                    "type": "constant"
                   },
                   {
-                    "type": "enhanced_commands:constant",
+                    "type": "constant",
                     "value": false
                   }
                 ],

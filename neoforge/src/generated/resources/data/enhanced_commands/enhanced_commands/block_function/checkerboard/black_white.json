@@ -1,0 +1,10 @@
+{
+  "type": "checkerboard",
+  "functions": {
+    "elements": [
+      "minecraft:white_concrete",
+      "minecraft:black_concrete"
+    ],
+    "weighted": false
+  }
+}

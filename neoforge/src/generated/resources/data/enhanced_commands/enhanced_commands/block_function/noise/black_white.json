@@ -1,0 +1,16 @@
+{
+  "type": "noise",
+  "list": {
+    "elements": [
+      "minecraft:white_concrete",
+      "minecraft:black_concrete"
+    ],
+    "weighted": false
+  },
+  "parameters": {
+    "amplitudes": [
+      1.0
+    ],
+    "firstOctave": -1
+  }
+}

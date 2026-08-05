@@ -1,0 +1,31 @@
+{
+  "type": "noise",
+  "list": {
+    "entries": [
+      {
+        "element": {
+          "type": "constant"
+        }
+      },
+      {
+        "element": {
+          "type": "constant",
+          "value": false
+        },
+        "weight": 5.0
+      }
+    ],
+    "weighted": true
+  },
+  "parameters": {
+    "amplitudes": [
+      1.0
+    ],
+    "firstOctave": -1
+  },
+  "scale": [
+    0.2,
+    0.2,
+    0.2
+  ]
+}

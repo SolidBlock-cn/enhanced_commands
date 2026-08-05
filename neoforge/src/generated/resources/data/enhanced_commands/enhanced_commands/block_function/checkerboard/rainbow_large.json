@@ -1,0 +1,28 @@
+{
+  "type": "checkerboard",
+  "floor": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "functions": {
+    "elements": [
+      "minecraft:red_concrete",
+      "minecraft:orange_concrete",
+      "minecraft:yellow_concrete",
+      "minecraft:lime_concrete",
+      "minecraft:green_concrete",
+      "minecraft:cyan_concrete",
+      "minecraft:light_blue_concrete",
+      "minecraft:blue_concrete",
+      "minecraft:purple_concrete",
+      "minecraft:magenta_concrete"
+    ],
+    "weighted": false
+  },
+  "scale": [
+    0.3333333432674408,
+    0.3333333432674408,
+    0.3333333432674408
+  ]
+}

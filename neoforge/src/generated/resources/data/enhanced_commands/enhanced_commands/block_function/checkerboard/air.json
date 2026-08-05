@@ -1,0 +1,12 @@
+{
+  "type": "checkerboard",
+  "functions": {
+    "elements": [
+      "minecraft:air",
+      {
+        "type": "empty"
+      }
+    ],
+    "weighted": false
+  }
+}

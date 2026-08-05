@@ -1,0 +1,13 @@
+{
+  "type": "outline",
+  "outline_type": "outline",
+  "region": {
+    "type": "sphere",
+    "center": [
+      0.0,
+      64.0,
+      0.0
+    ],
+    "radius": 16.0
+  }
+}
