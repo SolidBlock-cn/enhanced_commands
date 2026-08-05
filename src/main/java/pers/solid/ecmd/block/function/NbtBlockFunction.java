@@ -22,7 +22,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 
-import java.util.Collections;
+import java.util.List;
 
 public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction {
   public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, NbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
@@ -55,7 +55,7 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
 
   @Override
   public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList(); // todo add nbtFunction
+    return List.of(nbtFunction);
   }
 
   public enum NbtParser implements Parser<NbtBlockFunction> {
