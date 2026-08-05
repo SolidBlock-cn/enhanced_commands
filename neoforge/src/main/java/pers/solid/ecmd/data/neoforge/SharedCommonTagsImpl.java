@@ -10,11 +10,15 @@ public class SharedCommonTagsImpl {
   private SharedCommonTagsImpl() {
   }
 
-  public static TagKey<Block> oresConventionalTag() {
+  public static TagKey<Block> ores() {
     return Tags.Blocks.ORES;
   }
 
-  public static TagKey<Block> conventionalBudsTag() {
+  public static TagKey<Block> buds() {
     return Tags.Blocks.BUDS;
+  }
+
+  public static TagKey<Block> villagerJobSites() {
+    return Tags.Blocks.VILLAGER_JOB_SITES;
   }
 }
