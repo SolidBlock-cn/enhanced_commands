@@ -9,21 +9,10 @@ import pers.solid.ecmd.EnhancedCommands;
  * @see net.minecraft.tags.BlockTags
  */
 public final class EnhancedCommandsBlockTags {
-  public static final TagKey<Block> RED_COLORS = of("red_colors");
-  public static final TagKey<Block> ORANGE_COLORS = of("orange_colors");
-  public static final TagKey<Block> YELLOW_COLORS = of("yellow_colors");
-  public static final TagKey<Block> GREEN_COLORS = of("green_colors");
-  public static final TagKey<Block> LIGHT_BLUE_COLORS = of("light_blue_colors");
-  public static final TagKey<Block> BLUE_COLORS = of("blue_colors");
-  public static final TagKey<Block> PINK_COLORS = of("pink_colors");
-  public static final TagKey<Block> BLACK_COLORS = of("black_colors");
-  public static final TagKey<Block> GRAY_COLORS = of("gray_colors");
-  public static final TagKey<Block> WHITE_COLORS = of("white_colors");
-
   public static final TagKey<Block> OVERLAID_DIRT = of("overlaid_dirt");
-  public static final TagKey<Block> DEAD_CORAL_BLOCK = of("dead_coral_block");
+  public static final TagKey<Block> DEAD_CORAL_BLOCKS = of("dead_coral_blocks");
 
-  public static final TagKey<Block> NATUALIZE_IGNORE = of("natualize_ignore");
+  public static final TagKey<Block> NATURALIZE_IGNORED = of("naturalize_ignored");
 
   public static final TagKey<Block> NETHER_FUNGUS = of("nether_fungus");
   public static final TagKey<Block> NETHER_ROOTS = of("nether_roots");

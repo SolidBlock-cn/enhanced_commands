@@ -38,6 +38,10 @@ public record NaturalEnchantmentsFunction(NumberProvider level, Optional<HolderS
       RegistryCodecs.homogeneousList(Registries.ENCHANTMENT).optionalFieldOf("possible_values").forGetter(NaturalEnchantmentsFunction::possibleValues)
   ).apply(i, NaturalEnchantmentsFunction::new));
 
+  public NaturalEnchantmentsFunction(NumberProvider level) {
+    this(level, Optional.empty());
+  }
+
   @Override
   public void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
     final List<EnchantmentInstance> instances = EnchantmentHelper.selectEnchantment(context.random, stack, ((NumberProviderExtension) level).getInt(context), possibleValues.map(HolderSet::stream).orElseGet(() -> context.registries().lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Function.identity())));

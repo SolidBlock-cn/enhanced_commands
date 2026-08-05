@@ -11,12 +11,17 @@ public class SharedCommonTags {
   }
 
   @ExpectPlatform
-  public static TagKey<Block> oresConventionalTag() {
+  public static TagKey<Block> ores() {
     throw new AssertionError();
   }
 
   @ExpectPlatform
-  static TagKey<Block> conventionalBudsTag() {
+  static TagKey<Block> buds() {
+    throw new AssertionError();
+  }
+
+  @ExpectPlatform
+  static TagKey<Block> villagerJobSites() {
     throw new AssertionError();
   }
 }

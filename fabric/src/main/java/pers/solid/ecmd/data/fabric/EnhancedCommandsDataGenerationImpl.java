@@ -12,11 +12,17 @@ public class EnhancedCommandsDataGenerationImpl implements DataGeneratorEntrypoi
   public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
     final FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 
-    pack.addProvider(BlockTagDataGeneratorImpl::new);
+    pack.addProvider((output, registriesFuture) -> new TagGenerationBridgeImpl.ForBlock(output, registriesFuture, new BlockTagDataGeneration()));
     addDynamicRegistryGeneration(pack, new BlockFunctionDataGeneration());
     addDynamicRegistryGeneration(pack, new BlockPredicateDataGeneration());
+    addDynamicRegistryGeneration(pack, new EnchantmentsFunctionDataGeneration());
+    addDynamicRegistryGeneration(pack, new EntityPredicateDataGeneration());
     addDynamicRegistryGeneration(pack, new ItemFunctionDataGeneration());
     addDynamicRegistryGeneration(pack, new ItemPredicateDataGeneration());
+    addDynamicRegistryGeneration(pack, new NbtFunctionDataGeneration());
+    addDynamicRegistryGeneration(pack, new NbtPredicateDataGeneration());
+    addDynamicRegistryGeneration(pack, new NumberProviderDataGeneration());
+    addDynamicRegistryGeneration(pack, new RegionDataGeneration());
   }
 
   private static <T> void addDynamicRegistryGeneration(FabricDataGenerator.Pack pack, DynamicRegistryGenerationBridge<T> bridge) {

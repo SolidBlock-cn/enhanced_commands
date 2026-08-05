@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemFunctionDataGeneration implements DynamicRegistryGenerationBridge<ItemFunction> {
-  static ResourceKey<ItemFunction> of(String value) {
+  private static ResourceKey<ItemFunction> of(String value) {
     return ResourceKey.create(ItemFunction.REGISTRY_KEY, EnhancedCommands.id(value));
   }
 
@@ -25,29 +25,29 @@ public class ItemFunctionDataGeneration implements DynamicRegistryGenerationBrid
 
   @Override
   public void configureBridge(ContextBridge<ItemFunction> context) {
-    context.add(of("enchant_randomly"), new EnchantItemFunction(List.of(new NaturalEnchantmentsFunction(ConstantValue.exactly(30), Optional.empty()))));
-    context.add(of("super_reasonable_enchant"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
+    context.add(of("enchant/randomly"), new EnchantItemFunction(List.of(new NaturalEnchantmentsFunction(ConstantValue.exactly(30), Optional.empty()))));
+    context.add(of("enchant/super_reasonable"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
         EnchantmentModificationTarget.Special.ALL_SUPPORTED,
         EnchantmentLevelProvider.Special.MAX_REASONABLE,
         false,
         false,
         false
     ))));
-    context.add(of("super_extreme_enchant"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
+    context.add(of("enchant/super_extreme"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
         EnchantmentModificationTarget.Special.ALL_SUPPORTED,
         EnchantmentLevelProvider.Special.MAX_POSSIBLE,
         false,
         false,
         false
     ))));
-    context.add(of("super_everything_enchant"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
+    context.add(of("enchant/super_everything"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
         EnchantmentModificationTarget.Special.ALL,
         EnchantmentLevelProvider.Special.MAX_POSSIBLE,
         false,
         false,
         false
     ))));
-    context.add(of("mess_enchant"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
+    context.add(of("enchant/mess"), new EnchantItemFunction(List.of(new AddEnchantmentsFunction(
         EnchantmentModificationTarget.Special.ALL,
         EnchantmentLevelProvider.Special.RANDOM_POSSIBLE,
         false,
