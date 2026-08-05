@@ -60,10 +60,6 @@ public class EnhancedServerReloadableRegistries {
       Map<ResourceLocation, T> map = new HashMap<>();
       SimpleJsonResourceReloadListener.scanDirectory(resourceManager, registryKey, ops, codec, map);
       map.forEach((id, value) -> mutableRegistry.register(ResourceKey.create(registryKey, id), value, new RegistrationInfo(Optional.empty(), Lifecycle.experimental())));
-
-      // todo 像 1.21.1 分支一样，处理无法解析的情况，例如：
-      //  SimpleJsonResourceReloadListener.scanDirectory(resourceManager, string, GSON, map);
-      //  map.forEach((id, json) -> codec.parse(ops, json).ifSuccess((value) -> mutableRegistry.register(ResourceKey.create(registryKey, id), value, new RegistrationInfo(Optional.empty(), Lifecycle.experimental()))).ifError(error -> LOGGER.error("Failed to parse entry of registry {} with ID {}, reason: {}", registry, id, error.message())));
       return mutableRegistry;
     }, prepareExecutor);
   }
