@@ -25,6 +25,6 @@ public record ReferenceItemFunction(Holder.Reference<ItemFunction> reference) im
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 }

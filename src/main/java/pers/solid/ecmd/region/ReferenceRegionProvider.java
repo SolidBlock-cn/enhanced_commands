@@ -13,7 +13,7 @@ public record ReferenceRegionProvider(Holder.Reference<RegionProvider<?>> refere
 
   @Override
   public Region toAbsoluteRegion(PositionProvider positionProvider) {
-    return reference.value().toAbsoluteRegion(positionProvider);
+    return value().toAbsoluteRegion(positionProvider);
   }
 
   @Override

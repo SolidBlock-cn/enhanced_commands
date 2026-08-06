@@ -24,6 +24,6 @@ public record ReferenceItemPredicate(Holder.Reference<ItemPredicate> reference) 
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 }

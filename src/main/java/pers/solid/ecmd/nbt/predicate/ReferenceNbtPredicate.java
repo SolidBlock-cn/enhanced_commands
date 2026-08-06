@@ -13,12 +13,12 @@ public record ReferenceNbtPredicate(Holder.Reference<NbtPredicate> reference) im
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 
   @Override
   public boolean test(Tag nbtElement) {
-    return reference.value().test(nbtElement);
+    return value().test(nbtElement);
   }
 
   @Override

@@ -13,7 +13,7 @@ public record ReferenceEnchantmentsFunction(Holder.Reference<EnchantmentsFunctio
 
   @Override
   public void modify(ItemStack stack, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
-    reference.value().modify(stack, enchantments, context);
+    value().modify(stack, enchantments, context);
   }
 
   @Override
@@ -23,6 +23,6 @@ public record ReferenceEnchantmentsFunction(Holder.Reference<EnchantmentsFunctio
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 }

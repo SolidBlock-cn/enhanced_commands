@@ -20,8 +20,7 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) 
 
   @Override
   public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
-    final BlockFunction value = reference().value();
-    return value.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
+    return value().getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 
   @Override
@@ -31,7 +30,7 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) 
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 
 }
