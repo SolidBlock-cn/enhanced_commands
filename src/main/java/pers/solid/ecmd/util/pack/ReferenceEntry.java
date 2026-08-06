@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -44,10 +45,55 @@ public interface ReferenceEntry<E> extends RequiresValidation {
     return RecordCodecBuilder.mapCodec(i -> i.group(new SafeReferenceCodec<>(idCodec, registryKey).fieldOf("reference").forGetter(ReferenceEntry::reference)).apply(i, function));
   }
 
-  Holder.Reference<E> reference();
-
   static <E> ReferenceEntry<E> of(Holder.Reference<E> reference) {
     return () -> reference;
+  }
+
+  Holder.Reference<E> reference();
+
+  @ApiStatus.NonExtendable
+  default E value() {
+    return reference().value();
+  }
+
+  @ApiStatus.NonExtendable
+  default ResourceLocation identifier() {
+    return reference().key().location();
+  }
+
+  @Override
+  default Iterable<? extends @Nullable Object> membersToValidate() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  default void validate(ValidationContext context) {
+    final Holder.Reference<E> reference = reference();
+    if (!context.isElementReferenced(reference.key())) {
+      final ValidationContext newContext = context.forReferencedElement(reference.key());
+      final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
+      if (optionalLookup.isEmpty()) {
+        return;
+      }
+      final Optional<Holder.Reference<E>> optionalReference = optionalLookup.get().get(reference.key());
+      if (optionalReference.isPresent()) {
+        if (optionalReference.get().value() instanceof RequiresValidation r) {
+          r.validate(newContext);
+          if (newContext.hasProblems()) {
+            if (reference instanceof LazyReference<E> lazy) {
+              lazy.setProblem(ValidationProblem.concentrateMultiple(newContext.problems()));
+            }
+          }
+        }
+      }
+    } else {
+      final RecursiveReferenceProblem<E> problem = new RecursiveReferenceProblem<>(reference.key());
+      context.recordProblem(problem);
+
+      if (reference instanceof LazyReference<E> lazy) {
+        lazy.setProblem(problem);
+      }
+    }
   }
 
   /**
@@ -166,41 +212,6 @@ public interface ReferenceEntry<E> extends RequiresValidation {
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       holderReference = affiliatedPrefixedIdParser.parseAndGetReference(parseContext);
-    }
-  }
-
-  @Override
-  default Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  default void validate(ValidationContext context) {
-    final Holder.Reference<E> reference = reference();
-    if (!context.isElementReferenced(reference.key())) {
-      final ValidationContext newContext = context.forReferencedElement(reference.key());
-      final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
-      if (optionalLookup.isEmpty()) {
-        return;
-      }
-      final Optional<Holder.Reference<E>> optionalReference = optionalLookup.get().get(reference.key());
-      if (optionalReference.isPresent()) {
-        if (optionalReference.get().value() instanceof RequiresValidation r) {
-          r.validate(newContext);
-          if (newContext.hasProblems()) {
-            if (reference instanceof LazyReference<E> lazy) {
-              lazy.setProblem(ValidationProblem.concentrateMultiple(newContext.problems()));
-            }
-          }
-        }
-      }
-    } else {
-      final RecursiveReferenceProblem<E> problem = new RecursiveReferenceProblem<>(reference.key());
-      context.recordProblem(problem);
-
-      if (reference instanceof LazyReference<E> lazy) {
-        lazy.setProblem(problem);
-      }
     }
   }
 }

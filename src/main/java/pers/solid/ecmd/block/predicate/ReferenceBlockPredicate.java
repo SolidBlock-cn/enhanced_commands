@@ -16,15 +16,14 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference
 
   @Override
   public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final BlockPredicate value = reference().value();
-    return value.test(blockInWorld, executionContext);
+    return value().test(blockInWorld, executionContext);
   }
 
   @Override
   public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final TestResult testResult = reference.value().testAndDescribe(blockInWorld, executionContext);
+    final TestResult testResult = value().testAndDescribe(blockInWorld, executionContext);
     final MutableComponent posText = TextUtil.wrapVector(blockInWorld.getPos());
-    final MutableComponent idText = TextUtil.literal(reference.key().location()).withStyle(Styles.EXPECTED);
+    final MutableComponent idText = TextUtil.literal(identifier()).withStyle(Styles.EXPECTED);
     if (testResult.successes()) {
       return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.reference.pass", posText, idText), List.of(testResult));
     } else {
@@ -39,6 +38,6 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 }

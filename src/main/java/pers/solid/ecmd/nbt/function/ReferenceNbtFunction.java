@@ -16,7 +16,7 @@ public record ReferenceNbtFunction(Holder.Reference<NbtFunction> reference) impl
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 
   @Override
@@ -26,6 +26,6 @@ public record ReferenceNbtFunction(Holder.Reference<NbtFunction> reference) impl
 
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    return reference.value().apply(nbtElement, context);
+    return value().apply(nbtElement, context);
   }
 }

@@ -16,23 +16,23 @@ public record ReferenceEntityPredicateEntry(Holder.Reference<EntityPredicate> re
 
   @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 
   @Override
   public String toOptionEntry() {
-    return "reference=" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
+    return "reference=" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(identifier());
   }
 
   @Override
   public boolean test(Entity entity, ExecutionContext context) {
-    return reference.value().test(entity, context);
+    return value().test(entity, context);
   }
 
   @Override
   public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException {
-    final TestResult testResult = reference.value().testAndDescribe(entity, context);
-    final MutableComponent idText = TextUtil.literal(reference.key().location()).withStyle(Styles.EXPECTED);
+    final TestResult testResult = value().testAndDescribe(entity, context);
+    final MutableComponent idText = TextUtil.literal(identifier()).withStyle(Styles.EXPECTED);
     if (testResult.successes()) {
       return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.reference.pass", displayName, idText), List.of(testResult));
     } else {
