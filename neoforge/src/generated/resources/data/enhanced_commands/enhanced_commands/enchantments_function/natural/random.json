@@ -1,0 +1,8 @@
+{
+  "type": "natural",
+  "level": {
+    "type": "minecraft:uniform",
+    "max": 30.0,
+    "min": 0.0
+  }
+}

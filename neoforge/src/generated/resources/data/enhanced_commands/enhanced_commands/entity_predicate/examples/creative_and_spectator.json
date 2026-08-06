@@ -1,0 +1,7 @@
+{
+  "type": "game_mode",
+  "game_mode": [
+    "spectator",
+    "creative"
+  ]
+}

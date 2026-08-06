@@ -1,0 +1,53 @@
+{
+  "type": "conditions",
+  "conditions": [
+    {
+      "condition": {
+        "type": "any",
+        "predicates": [
+          "#enhanced_commands:nether_fungus",
+          "minecraft:dead_bush"
+        ]
+      },
+      "then": "#minecraft:small_flowers"
+    },
+    {
+      "condition": "#enhanced_commands:nether_roots",
+      "then": "minecraft:short_grass"
+    },
+    {
+      "condition": "#enhanced_commands:nether_natural_stem",
+      "then": "minecraft:oak_log"
+    },
+    {
+      "condition": "#enhanced_commands:nether_natural_hyphae",
+      "then": "minecraft:oak_wood"
+    },
+    {
+      "condition": "#enhanced_commands:nether_stripped_stem",
+      "then": "minecraft:stripped_oak_log"
+    },
+    {
+      "condition": "#enhanced_commands:nether_stripped_hyphae",
+      "then": "minecraft:stripped_oak_wood"
+    },
+    {
+      "condition": "#minecraft:wart_blocks",
+      "then": {
+        "type": "simple",
+        "block": "minecraft:oak_leaves",
+        "properties": [
+          {
+            "type": "simple",
+            "property": "persistent",
+            "value": "false"
+          }
+        ]
+      }
+    },
+    {
+      "condition": "#enhanced_commands:nether_vines",
+      "then": "minecraft:vine"
+    }
+  ]
+}

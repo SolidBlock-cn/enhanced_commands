@@ -1,0 +1,10 @@
+{
+  "type": "enchant",
+  "modifiers": [
+    {
+      "type": "add",
+      "enchantment": "all",
+      "level": "max_possible"
+    }
+  ]
+}

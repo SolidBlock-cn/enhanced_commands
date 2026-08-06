@@ -1,0 +1,9 @@
+{
+  "type": "enchant",
+  "modifiers": [
+    {
+      "type": "natural",
+      "level": 30.0
+    }
+  ]
+}
