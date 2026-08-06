@@ -19,14 +19,14 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public record PostProcessBlockFunction(List<Direction> directions) implements BlockFunction {
+public record PostProcessBlockFunction(List<Direction> directions) implements BlockFunction, DoesNotRequireValidation {
   public static final List<Direction> ALL_DIRECTIONS = List.of(Direction.values());
   public static final MapCodec<PostProcessBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", ALL_DIRECTIONS).forGetter(PostProcessBlockFunction::directions)
@@ -55,11 +55,6 @@ public record PostProcessBlockFunction(List<Direction> directions) implements Bl
   @Override
   public String expressAsString() {
     return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PostProcessBlockFunction> {

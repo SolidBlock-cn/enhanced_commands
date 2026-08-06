@@ -10,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate {
+public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate, DoesNotRequireValidation {
   public static final MapCodec<RegexNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ExtraCodecs.PATTERN.fieldOf("pattern").forGetter(RegexNbtPredicate::pattern)
   ).apply(i, RegexNbtPredicate::new));
@@ -49,11 +49,6 @@ public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate {
   @Override
   public NbtPredicateType<RegexNbtPredicate> getType() {
     return NbtPredicateTypes.REGEX;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return List.of();
   }
 
   public static class Parser implements FunctionContentParser<RegexNbtPredicate> {

@@ -9,10 +9,11 @@ import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Set;
 
-public record TagEntityPredicateEntry(String tag, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record TagEntityPredicateEntry(String tag, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<TagEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.STRING.fieldOf("tag").forGetter(TagEntityPredicateEntry::tag),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TagEntityPredicateEntry::inverted)

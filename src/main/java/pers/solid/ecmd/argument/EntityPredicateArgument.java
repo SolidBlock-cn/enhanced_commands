@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
-import pers.solid.ecmd.entity.predicate.EntitySelectors;
+import pers.solid.ecmd.entity.predicate.EntitySelectorReaderExtras;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,16 +55,17 @@ public record EntityPredicateArgument(CommandBuildContext commandBuildContext) i
       entitySelectorParser.extension$ec().context = context;
 
       try {
-        EntitySelectors.readOmittibleEntitySelector(entitySelectorParser);
+        EntityPredicate.parse(entitySelectorParser);
       } catch (CommandSyntaxException ignored) {
       }
 
-      return entitySelectorParser.fillSuggestions(builder, builder1 -> {
+      return entitySelectorParser.fillSuggestions(builder, suggestionsBuilder -> {
         Collection<String> collection = commandSource.getOnlinePlayerNames();
         Iterable<String> iterable = Iterables.concat(collection, commandSource.getSelectedEntities());
-        SharedSuggestionProvider.suggest(iterable, builder1);
-        if (builder1.getRemaining().isEmpty()) {
-          builder1.suggest("[");
+        SharedSuggestionProvider.suggest(iterable, suggestionsBuilder);
+        if (suggestionsBuilder.getRemaining().isEmpty()) {
+          suggestionsBuilder.suggest("[");
+          suggestionsBuilder.suggest("$", EntitySelectorReaderExtras.REFERENCE_PARSER.tooltip);
         }
       });
     } else {

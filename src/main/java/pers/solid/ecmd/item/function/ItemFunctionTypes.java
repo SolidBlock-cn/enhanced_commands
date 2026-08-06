@@ -46,6 +46,6 @@ public final class ItemFunctionTypes {
     functionsParser.register("enchant", Component.translatable("enhanced_commands.item_function.enchant"), EnchantItemFunction.Parser::new);
     functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayItemFunction.Parser::new);
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickItemFunction.Parser::new);
-    functionsParser.register("reference", Component.translatable("enhanced_commands.function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.ReferencePrefixedParser.INSTANCE));
+    functionsParser.register("reference", Component.translatable("enhanced_commands.function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.PREFIXED_ID_PARSER));
   }
 }

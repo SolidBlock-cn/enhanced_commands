@@ -21,6 +21,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ import java.util.*;
  * @param exposureType The exposure type. By default, it is exposed to empty collision.
  * @param directions   The directions to test exposure.
  */
-public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> directions) implements BlockPredicate {
+public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> directions) implements BlockPredicate, DoesNotRequireValidation {
   public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
 
   @Override
@@ -70,11 +71,6 @@ public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> di
   @Override
   public BlockPredicateType<ExposeBlockPredicate> getType() {
     return BlockPredicateTypes.EXPOSE;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   /**

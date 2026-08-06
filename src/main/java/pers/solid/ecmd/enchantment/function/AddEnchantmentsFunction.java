@@ -85,7 +85,7 @@ public record AddEnchantmentsFunction(EnchantmentModificationTarget enchantment,
     reader.skipWhitespace();
     parseContext.addSuggestion((context, builder) -> {
       if (builder.getRemaining().isEmpty()) {
-        builder.suggest("-", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters"));
+        builder.suggest("-", Component.translatable("enhanced_commands.enchantments_function.add.parameters"));
       }
       return builder.buildFuture();
     });
@@ -96,13 +96,13 @@ public record AddEnchantmentsFunction(EnchantmentModificationTarget enchantment,
       parseContext.setSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
           if (!supportedOnly.booleanValue()) {
-            builder.suggest("s", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.s"));
+            builder.suggest("s", Component.translatable("enhanced_commands.enchantments_function.add.parameters.s"));
           }
           if (!clamp.booleanValue()) {
-            builder.suggest("c", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.c"));
+            builder.suggest("c", Component.translatable("enhanced_commands.enchantments_function.add.parameters.c"));
           }
           if (!upgradeOnly.booleanValue()) {
-            builder.suggest("u", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.u"));
+            builder.suggest("u", Component.translatable("enhanced_commands.enchantments_function.add.parameters.u"));
           }
         }
         return builder.buildFuture();

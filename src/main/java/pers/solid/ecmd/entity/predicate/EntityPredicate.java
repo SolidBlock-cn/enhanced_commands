@@ -1,6 +1,7 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.selector.EntitySelector;
@@ -14,10 +15,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.pack.RequiresValidation;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -98,7 +99,26 @@ public interface EntityPredicate extends ExpressionConvertible, RequiresValidati
    * }</pre>
    */
   static EntityPredicate parse(EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
+    final StringReader reader = entitySelectorReader.getReader();
+
+    if (reader.canRead() && reader.peek() == '$') {
+      ReferenceEntityPredicateEntry result = handlePrefixedReferenceParsing(entitySelectorReader, reader, entitySelectorReader.extension$ec().context);
+      if (result != null) return result;
+    }
+
     return simplifiedBySelector(EntitySelectors.readOmittibleEntitySelector(entitySelectorReader));
+  }
+
+  private static @Nullable <S> ReferenceEntityPredicateEntry handlePrefixedReferenceParsing(EntitySelectorParser entitySelectorReader, StringReader reader, CommandContext<S> context) throws CommandSyntaxException {
+    final ParseContext<S> parseContext = new ParseContext<>(null, reader, false, true);
+    @Nullable ReferenceEntityPredicateEntry result;
+    try {
+      result = EntitySelectorReaderExtras.REFERENCE_PARSER.parse(parseContext);
+    } finally {
+      // 提取为方法是为避免出现泛型错误
+      entitySelectorReader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
+    }
+    return result;
   }
 
   static TestResult successResult(Entity entity) {
@@ -139,9 +159,4 @@ public interface EntityPredicate extends ExpressionConvertible, RequiresValidati
   TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException;
 
   EntityPredicateType<?> getType();
-
-  @Override
-  default Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
-  }
 }

@@ -22,7 +22,7 @@ public class EnhancedCommandsDataGenerationImpl implements DataGeneratorEntrypoi
     addDynamicRegistryGeneration(pack, new NbtFunctionDataGeneration());
     addDynamicRegistryGeneration(pack, new NbtPredicateDataGeneration());
     addDynamicRegistryGeneration(pack, new NumberProviderDataGeneration());
-    addDynamicRegistryGeneration(pack, new RegionDataGeneration());
+    addDynamicRegistryGeneration(pack, new RegionProviderDataGeneration());
   }
 
   private static <T> void addDynamicRegistryGeneration(FabricDataGenerator.Pack pack, DynamicRegistryGenerationBridge<T> bridge) {

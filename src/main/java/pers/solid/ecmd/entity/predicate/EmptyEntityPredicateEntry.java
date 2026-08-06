@@ -5,8 +5,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public enum EmptyEntityPredicateEntry implements EntityPredicateEntry, StaticEntityPredicate {
+public enum EmptyEntityPredicateEntry implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<EmptyEntityPredicateEntry> CODEC = MapCodec.unit(INSTANCE);
 

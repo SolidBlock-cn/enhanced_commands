@@ -20,6 +20,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyNamePredicate;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * @see BlockStateParser#readTag()
  */
-public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
+public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate, DoesNotRequireValidation {
   public static final Codec<TagBlockPredicate> STRING_BASED_CODEC = RegistryCodecs.homogeneousList(Registries.BLOCK, true).flatComapMap(TagBlockPredicate::new, tagBlockPredicate -> tagBlockPredicate.properties.isEmpty() ? DataResult.success(tagBlockPredicate.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
   public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, RegistryCodecs.homogeneousList(Registries.BLOCK, true).fieldOf("tag").forGetter(TagBlockPredicate::tag), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
@@ -88,11 +89,6 @@ public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<Pro
   @Override
   public BlockPredicateType<TagBlockPredicate> getType() {
     return BlockPredicateTypes.TAG;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return List.of();
   }
 
   public enum TagParser implements Parser<TagBlockPredicate> {

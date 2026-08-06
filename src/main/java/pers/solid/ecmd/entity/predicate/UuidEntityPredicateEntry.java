@@ -7,13 +7,14 @@ import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.UUID;
 
 /**
  * 主要用于没有使用实体选择器参数而是直接指定 uuid 的情形。
  */
-public record UuidEntityPredicateEntry(UUID uuid) implements SpecialEntityPredicate, StaticEntityPredicate {
+public record UuidEntityPredicateEntry(UUID uuid) implements SpecialEntityPredicate, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<UuidEntityPredicateEntry> CODEC = UUIDUtil.AUTHLIB_CODEC.fieldOf("uuid").xmap(UuidEntityPredicateEntry::new, UuidEntityPredicateEntry::uuid);
 
   @Override

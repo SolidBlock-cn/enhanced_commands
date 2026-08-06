@@ -9,11 +9,12 @@ import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 /**
  * 此用于实体未使用实体选择器而是直接指定玩家名称的情形，这种情况下只选择玩家并且忽略大小写。
  */
-public record PlayerNameEntityPredicate(String name) implements SpecialEntityPredicate, StaticEntityPredicate {
+public record PlayerNameEntityPredicate(String name) implements SpecialEntityPredicate, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<PlayerNameEntityPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.STRING.fieldOf("name").forGetter(PlayerNameEntityPredicate::name)
   ).apply(i, PlayerNameEntityPredicate::new));

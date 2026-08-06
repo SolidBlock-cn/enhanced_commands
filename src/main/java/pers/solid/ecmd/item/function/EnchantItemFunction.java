@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.enchantment.function.EnchantmentsFunction;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -40,6 +41,11 @@ public record EnchantItemFunction(List<EnchantmentsFunction> modifiers) implemen
   @Override
   public String expressAsString() {
     return modifiers.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "enchant(", ")"));
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return modifiers;
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<EnchantItemFunction> {

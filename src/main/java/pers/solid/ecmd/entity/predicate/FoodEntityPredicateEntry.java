@@ -9,8 +9,9 @@ import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record FoodEntityPredicateEntry(BridgeIntRange food, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record FoodEntityPredicateEntry(BridgeIntRange food, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<FoodEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeIntRange.CODEC.fieldOf("food").forGetter(FoodEntityPredicateEntry::food),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(FoodEntityPredicateEntry::inverted)

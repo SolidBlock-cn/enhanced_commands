@@ -16,6 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -55,27 +56,35 @@ public interface ReferenceEntry<E> extends RequiresValidation {
    * @param <T> 该 reference 类自身所代表的类型
    * @param <E> 可数据驱动对象的类型
    */
-  abstract class PrefixedIdParser<T, E> implements Parser<T> {
-    private final char prefix;
-    private final Component tooltip;
-    private final ResourceKey<? extends Registry<E>> registryKey;
+  class PrefixedIdParser<T, E> implements Parser<T> {
+    public final char prefix;
+    public final Component tooltip;
+    public final ResourceKey<? extends Registry<E>> registryKey;
+    private final FailableFunction<Holder.Reference<E>, T, CommandSyntaxException> resultProvider;
 
-    protected PrefixedIdParser(char prefix, Component tooltip, ResourceKey<? extends Registry<E>> registryKey) {
+    public PrefixedIdParser(char prefix, Component tooltip, ResourceKey<? extends Registry<E>> registryKey, FailableFunction<Holder.Reference<E>, T, CommandSyntaxException> resultProvider) {
       this.prefix = prefix;
       this.tooltip = tooltip;
       this.registryKey = registryKey;
+      this.resultProvider = resultProvider;
     }
 
+    /**
+     * 解析以前缀开头的引用语法。如果没有检测到前缀，则会恢复原来的 cursor 位置，并返回 null，不报错。
+     *
+     * @throws CommandSyntaxException 当解析出的 ID 不合法或者不存在
+     */
     @Override
     public @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
-      boolean prefixed = false;
       final StringReader reader = parseContext.reader();
+      final int restoreCursor = reader.getCursor();
       if (reader.canRead() && reader.peek() == prefix) {
         reader.skip();
-        prefixed = true;
+      } else {
+        reader.setCursor(restoreCursor);
+        return null;
       }
-      if (!prefixed) return null;
       parseContext.clearSuggestion();
 
       final Holder.Reference<E> holderReference = parseAndGetReference(parseContext);
@@ -83,7 +92,9 @@ public interface ReferenceEntry<E> extends RequiresValidation {
     }
 
     /**
-     * 解析前缀之后的 ID 的内容，并返回一个 Holder.Reference。
+     * 解析前缀之后的 ID 的内容，并返回一个 {@link Holder.Reference}。
+     *
+     * @throws CommandSyntaxException 当解析出的 ID 不合法或者不存在
      */
     public Holder.Reference<E> parseAndGetReference(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
@@ -108,7 +119,7 @@ public interface ReferenceEntry<E> extends RequiresValidation {
       return entry.get();
     }
 
-    private CompletableFuture<Suggestions> getIdSuggestion(ParseContext<?> parseContext, @UnknownNullability CommandContext<?> context, @UnknownNullability SuggestionsBuilder builder, int cursorBeforeId) {
+    public CompletableFuture<Suggestions> getIdSuggestion(ParseContext<?> parseContext, @UnknownNullability CommandContext<?> context, @UnknownNullability SuggestionsBuilder builder, int cursorBeforeId) {
       if (context.getSource() instanceof CommandSourceStack) {
         return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registries().lookupOrThrow(registryKey).listElementIds().map(ResourceKey::location), builder.createOffset(cursorBeforeId));
       } else if (context.getSource() instanceof SharedSuggestionProvider commandSource) {
@@ -118,7 +129,9 @@ public interface ReferenceEntry<E> extends RequiresValidation {
       }
     }
 
-    protected abstract T getResultByReference(Holder.Reference<E> holderReference) throws CommandSyntaxException;
+    public T getResultByReference(Holder.Reference<E> holderReference) throws CommandSyntaxException {
+      return resultProvider.apply(holderReference);
+    }
 
     protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, ResourceLocation identifier, int cursorEnd) {
       return EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, identifier, cursorEnd);

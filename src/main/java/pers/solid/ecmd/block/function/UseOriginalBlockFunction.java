@@ -14,10 +14,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
-
-public enum UseOriginalBlockFunction implements BlockFunction {
+public enum UseOriginalBlockFunction implements BlockFunction, DoesNotRequireValidation {
   USE_ORIGINAL;
 
   public static final MapCodec<UseOriginalBlockFunction> CODEC = MapCodec.unit(USE_ORIGINAL);
@@ -35,11 +34,6 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   @Override
   public BlockFunctionType<UseOriginalBlockFunction> getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public enum WaveParser implements Parser<UseOriginalBlockFunction> {

@@ -10,8 +10,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<AirMaxEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(AirMaxEntityPredicateEntry::inverted)
   ).apply(i, AirMaxEntityPredicateEntry::new));

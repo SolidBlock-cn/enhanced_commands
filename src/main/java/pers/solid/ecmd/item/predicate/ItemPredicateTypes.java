@@ -48,6 +48,6 @@ public final class ItemPredicateTypes {
     functionsParser.register("any", Component.translatable("enhanced_commands.item_predicate.any"), AnyItemPredicate.Parser::new);
     functionsParser.register("count", Component.translatable("enhanced_commands.item_predicate.count"), CountItemPredicate.Parser::new);
     functionsParser.register("probability", Component.translatable("enhanced_commands.item_predicate.probability"), ProbabilityItemPredicate.Parser::new);
-    functionsParser.register("reference", Component.translatable("enhanced_commands.item_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemPredicate.ReferencePrefixedParser.INSTANCE));
+    functionsParser.register("reference", Component.translatable("enhanced_commands.item_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemPredicate.PREFIXED_ID_PARSER));
   }
 }

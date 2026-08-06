@@ -5,11 +5,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 /**
  * 此为技术性的实体谓词，主要用于部分实体选择器因为限定游戏模式等原因只接受玩家等情形。
  */
-public enum PlayerOnlyEntityPredicate implements SpecialEntityPredicate, StaticEntityPredicate {
+public enum PlayerOnlyEntityPredicate implements SpecialEntityPredicate, StaticEntityPredicate, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<PlayerOnlyEntityPredicate> CODEC = MapCodec.unit(INSTANCE);
 

@@ -5,15 +5,17 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 /**
  * 这是在 {@link EntitySelectorParser} 中加入的一些额外的信息，用于本模组。
  */
 public class EntitySelectorReaderExtras {
-
+  public static final ReferenceEntry.PrefixedIdParser<ReferenceEntityPredicateEntry, EntityPredicate> REFERENCE_PARSER = new ReferenceEntry.PrefixedIdParser<>('$', Component.translatable("enhanced_commands.entity_predicate.reference"), EntityPredicate.REGISTRY_KEY, ReferenceEntityPredicateEntry::new);
   private final EntitySelectorParser self;
   /**
    * 在解析过程中，最近一次解析到的选项名称之前的位置所在的 cursor。

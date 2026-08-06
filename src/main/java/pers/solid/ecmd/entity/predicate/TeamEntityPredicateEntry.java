@@ -11,8 +11,9 @@ import net.minecraft.world.scores.Team;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record TeamEntityPredicateEntry(String team, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record TeamEntityPredicateEntry(String team, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<TeamEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.STRING.fieldOf("team").forGetter(TeamEntityPredicateEntry::team),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TeamEntityPredicateEntry::inverted)

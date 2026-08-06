@@ -9,8 +9,9 @@ import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record SaturationEntityPredicateEntry(BridgeFloatRange saturation, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record SaturationEntityPredicateEntry(BridgeFloatRange saturation, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<SaturationEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeFloatRange.CODEC.fieldOf("saturation").forGetter(SaturationEntityPredicateEntry::saturation),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(SaturationEntityPredicateEntry::inverted)

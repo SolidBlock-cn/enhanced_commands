@@ -127,7 +127,7 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
 
     Special(String name) {
       this.name = name;
-      this.description = Component.translatable("enhanced_commands.argument.enchantment_level_provider." + name);
+      this.description = Component.translatable("enhanced_commands.enchantment_level_provider." + name);
     }
 
     @Override
@@ -179,7 +179,7 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
     final int cursorStart = reader.getCursor();
     parseContext.addSuggestion((context, builder) -> {
       builder = builder.createOffset(cursorStart);
-      ParsingUtil.suggestString("upgrade", Component.translatable("enhanced_commands.argument.enchantment_level_provider.upgrade"), builder);
+      ParsingUtil.suggestString("upgrade", Component.translatable("enhanced_commands.enchantment_level_provider.upgrade"), builder);
       return SharedSuggestionProvider.suggest(Arrays.asList(Special.values()), builder, Special::getSerializedName, Special::getDescription);
     });
     final String unquotedString = reader.readUnquotedString();

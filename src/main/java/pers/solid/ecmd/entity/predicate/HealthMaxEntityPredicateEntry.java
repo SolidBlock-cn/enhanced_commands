@@ -11,8 +11,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<HealthMaxEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(HealthMaxEntityPredicateEntry::inverted)
   ).apply(i, HealthMaxEntityPredicateEntry::new));

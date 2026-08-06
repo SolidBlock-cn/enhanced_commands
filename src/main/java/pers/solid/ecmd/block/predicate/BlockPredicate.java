@@ -40,7 +40,7 @@ public interface BlockPredicate extends ExpressionConvertible, RequiresValidatio
       Either::unwrap));
   ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_predicate.cannot_parse"));
   Component INTERSECT_TOOLTIP = Component.translatable("enhanced_commands.predicate.all.symbol_tooltip");
   Component UNION_TOOLTIP = Component.translatable("enhanced_commands.predicate.any.symbol_tooltip");
 

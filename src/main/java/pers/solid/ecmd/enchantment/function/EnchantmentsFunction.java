@@ -14,6 +14,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public interface EnchantmentsFunction extends ExpressionConvertible {
   ResourceKey<Registry<EnchantmentsFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("enchantments_function"));
@@ -29,14 +30,21 @@ public interface EnchantmentsFunction extends ExpressionConvertible {
     final int cursorStart = reader.getCursor();
     parseContext.addSuggestion((context, builder) -> {
       builder = builder.createOffset(cursorStart);
-      ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.argument.enchantment_modification.remove_enchantment"), builder);
-      ParsingUtil.suggestString("natural", Component.translatable("enhanced_commands.argument.enchantment_modification.natural"), builder);
+      ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.enchantments_function.remove_enchantment"), builder);
+      ParsingUtil.suggestString("$", Component.translatable("enhanced_commands.enchantments_function.reference"), builder);
+      ParsingUtil.suggestString("natural", Component.translatable("enhanced_commands.enchantments_function.natural"), builder);
       return builder.buildFuture();
     });
 
     if (reader.canRead() && reader.peek() == '!') {
       parseContext.clearSuggestion();
       return RemoveEnchantmentsFunction.parse(parseContext);
+    } else if (reader.canRead() && reader.peek() == '$') {
+      parseContext.clearSuggestion();
+      final ReferenceEnchantmentsFunction result = new ReferenceEntry.PrefixedIdParser<>('$', Component.translatable("enhanced_commands.enchantments_function.reference"), REGISTRY_KEY, ReferenceEnchantmentsFunction::new).parse(parseContext);
+      if (result != null) {
+        return result;
+      }
     }
 
     final String unquotedString = reader.readUnquotedString();

@@ -4,8 +4,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record SimpleBooleanEntityPredicateEntry(SimpleBooleanEntityPredicateType type, boolean expected) implements EntityPredicateEntry, StaticEntityPredicate {
+public record SimpleBooleanEntityPredicateEntry(SimpleBooleanEntityPredicateType type, boolean expected) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   @Override
   public boolean test(Entity entity) {
     return type.predicate.test(entity) == expected;

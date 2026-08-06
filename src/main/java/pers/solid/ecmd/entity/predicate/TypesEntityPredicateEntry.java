@@ -17,11 +17,12 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<EntityType<?>>>> types, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<EntityType<?>>>> types, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<TypesEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.either(BuiltInRegistries.ENTITY_TYPE.byNameCodec(), TagKey.hashedCodec(Registries.ENTITY_TYPE)).listOf().fieldOf("types").forGetter(TypesEntityPredicateEntry::types),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TypesEntityPredicateEntry::inverted)

@@ -21,8 +21,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  *   idreplace('_planks$', 'wood')
  * </pre>
  */
-public record IdReplaceBlockFunction(Pattern pattern, String replacement) implements BlockFunction {
+public record IdReplaceBlockFunction(Pattern pattern, String replacement) implements BlockFunction, DoesNotRequireValidation {
   public static final MapCodec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(IdReplaceBlockFunction::new, ExtraCodecs.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
 
   @Override
@@ -70,11 +70,6 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   @Override
   public BlockFunctionType<IdReplaceBlockFunction> getType() {
     return BlockFunctionTypes.ID_REPLACE;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {

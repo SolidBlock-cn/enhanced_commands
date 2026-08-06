@@ -31,7 +31,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<RegionBlockPredicate> REGION = register("region", RegionBlockPredicate.CODEC);
   public static final BlockPredicateType<LootConditionBlockPredicate> LOOT_CONDITION = register("loot_condition", LootConditionBlockPredicate.CODEC);
   public static final BlockPredicateType<CheckerboardBlockPredicate> CHECKERBOARD = register("checkerboard", CheckerboardBlockPredicate.CODEC);
-  public static final BlockPredicateType<ReferenceBlockPredicate> REFERENCE = register("reference", ReferenceBlockPredicate.CODEC, ReferenceBlockPredicate.ReferencePrefixedParser.INSTANCE);
+  public static final BlockPredicateType<ReferenceBlockPredicate> REFERENCE = register("reference", ReferenceBlockPredicate.CODEC, ReferenceBlockPredicate.PREFIXED_ID_PARSER);
 
   private BlockPredicateTypes() {
   }
@@ -60,7 +60,7 @@ public final class BlockPredicateTypes {
     functionsParser.register("noise", Component.translatable("enhanced_commands.block_predicate.noise"), NoiseBlockPredicate.Parser::new);
     functionsParser.register("predicate", Component.translatable("enhanced_commands.block_predicate.loot_condition"), LootConditionBlockPredicate.Parser::new);
     functionsParser.register("probability", Component.translatable("enhanced_commands.block_predicate.probability"), ProbabilityBlockPredicate.Parser::new);
-    functionsParser.register("reference", Component.translatable("enhanced_commands.block_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockPredicate.ReferencePrefixedParser.INSTANCE));
+    functionsParser.register("reference", Component.translatable("enhanced_commands.block_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockPredicate.PREFIXED_ID_PARSER));
     functionsParser.register("region", Component.translatable("enhanced_commands.block_predicate.region"), RegionBlockPredicate.Parser::new);
     functionsParser.register("rel", Component.translatable("enhanced_commands.block_predicate.rel"), RelBlockPredicate.Parser::new);
     functionsParser.register("same", Component.translatable("enhanced_commands.block_predicate.bi_predicate_same"), () -> new BiPredicateBlockPredicate.Parser(true));

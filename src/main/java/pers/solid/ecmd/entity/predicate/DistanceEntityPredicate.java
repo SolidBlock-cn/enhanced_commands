@@ -14,8 +14,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record DistanceEntityPredicate(MinMaxBounds.Doubles distance, PositionOffsetInfo info) implements SpecialEntityPredicate {
+public record DistanceEntityPredicate(MinMaxBounds.Doubles distance, PositionOffsetInfo info) implements SpecialEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<DistanceEntityPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       MinMaxBounds.Doubles.CODEC.fieldOf("distance").forGetter(DistanceEntityPredicate::distance),
       PositionOffsetInfo.CODEC.codec().optionalFieldOf("info", PositionOffsetInfo.NO_OP).forGetter(DistanceEntityPredicate::info)

@@ -11,8 +11,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEntityPredicate {
+public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   /**
    * 经过 {@link Mth#wrapDegrees} 后处理的最小值，可以大于 max
    */

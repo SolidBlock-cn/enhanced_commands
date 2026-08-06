@@ -278,6 +278,9 @@ public final class NbtFunctionParser {
     final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext);
     if (functionGrammar != null) return functionGrammar;
 
+    final ReferenceNbtFunction reference = ReferenceNbtFunction.PREFIXED_ID_PARSER.parse(parseContext);
+    if (reference != null) return reference;
+
     if (!reader.canRead()) {
       throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
     }
@@ -297,7 +300,7 @@ public final class NbtFunctionParser {
   }
 
   /**
-   * 解析复合标签或者函数语法的函数，不会解析其他类型如数字、列表等。与 {@link #parseCompound} 不同的是，仍会解析函数语法，尽管这些情况下的 NBT 函数运行的结果不一定是复合标签。
+   * 解析复合标签或者函数语法的函数，不会解析其他类型如数字、列表等。与 {@link #parseCompound} 不同的是，仍会解析函数语法和引用语法，尽管这些情况下的 NBT 函数运行的结果不一定是复合标签。
    */
   public static <S> NbtFunction parsePreferringCompound(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     // 解析等号和不等号
@@ -305,6 +308,9 @@ public final class NbtFunctionParser {
 
     final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext);
     if (functionGrammar != null) return functionGrammar;
+
+    final ReferenceNbtFunction reference = ReferenceNbtFunction.PREFIXED_ID_PARSER.parse(parseContext);
+    if (reference != null) return reference;
 
     parseContext.terminateSuggestionsIfNotEmpty();
     parseContext.addSuggestion((context, suggestionsBuilder) -> NbtParserShared.suggestCompoundStart(suggestionsBuilder));

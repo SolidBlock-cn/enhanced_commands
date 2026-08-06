@@ -6,11 +6,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemFunction> components) implements ItemFunction {
+public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemFunction> components) implements ItemFunction, DoesNotRequireValidation {
   public static final MapCodec<ItemComponentCombinationItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ItemFunction.CODEC.fieldOf("base").forGetter(ItemComponentCombinationItemFunction::base),
       ItemFunction.CODEC.listOf().optionalFieldOf("components", ImmutableList.of()).forGetter(ItemComponentCombinationItemFunction::components)
