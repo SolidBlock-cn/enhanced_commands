@@ -1,6 +1,6 @@
-// 1.21.1	2026-08-06T19:50:30.0073566	Enhanced Commands/Tags for minecraft:block
-152f7727e985df13cfa1ab0ec5ae5c8c6cca2973 data\enhanced_commands\tags\block\nether_natural_hyphae.json
+// 1.21.1	2026-08-06T22:14:29.4860548	Enhanced Commands/Tags for minecraft:block
 151dce3ef6f7a11d90b32cc5bdb4292aa00254dc data\enhanced_commands\tags\block\naturalize_ignored.json
+152f7727e985df13cfa1ab0ec5ae5c8c6cca2973 data\enhanced_commands\tags\block\nether_natural_hyphae.json
 fea933c815ce85180f25f13a343be67a9e4658dc data\enhanced_commands\tags\block\nether_vines.json
 4788aa37cefab430f6b77b5a28573eef9e212692 data\enhanced_commands\tags\block\nether_fungus.json
 021bbb1301c57949576ec028041da438e565d0d5 data\enhanced_commands\tags\block\nether_natural_stem.json
