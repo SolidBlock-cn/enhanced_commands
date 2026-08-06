@@ -16,10 +16,11 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Set;
 
-public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, StaticEntityPredicate {
+public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   MapCodec<GameModeEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.either(GameType.CODEC, CodecUtil.set(GameType.CODEC)).fieldOf("game_mode").forGetter(o -> o instanceof Single single ? Either.left(single.gameMode()) : Either.right(((Multiple) o).gameModes())),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(GameModeEntityPredicateEntry::inverted)

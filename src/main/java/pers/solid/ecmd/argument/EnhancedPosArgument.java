@@ -56,7 +56,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
   public static final EnhancedCoordinates CURRENT_POS = EnhancedCoordinates.DefaultPos.doubleBased(0, 0, 0, true, true, true);
   public static final EnhancedCoordinates CURRENT_BLOCK_POS_CENTER = EnhancedCoordinates.DefaultPos.intBased(0, 0, 0, true, true, true, IntAlignType.CENTERED);
 
-  public static final SimpleCommandExceptionType LOCAL_COORDINATES_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
+  public static final SimpleCommandExceptionType LOCAL_COORDINATES_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.pos.local_coordinates_not_allowed"));
 
   public static EnhancedPosArgument blockPos() {
     return new EnhancedPosArgument(NumberType.INT_ONLY, IntAlignType.UNCHANGED);
@@ -109,10 +109,10 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     return context.getArgument(name, Coordinates.class).getPosition(context.getSource());
   }
 
-  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.unloaded", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
-  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
+  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.pos.unloaded", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.pos.out_of_build_limit", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.pos.out_of_bounds", pos));
+  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.pos.out_of_horizontal_bounds", pos, lowest, highest));
 
   public static <T extends BlockPos> T checkChunkLoaded(ServerLevel world, T blockPos) throws CommandSyntaxException {
     @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(blockPos);
@@ -260,7 +260,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     final StringReader reader = new StringReader(builder.getInput());
     reader.setCursor(builder.getStart());
     if (!reader.canRead()) {
-      builder.suggest("^^^", Component.translatable("enhanced_commands.argument.pos.local_coordinate"));
+      builder.suggest("^^^", Component.translatable("enhanced_commands.pos.local_coordinate"));
     }
     if (reader.canRead() && reader.peek() == '^') {
       int i;
@@ -280,7 +280,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
         reader.skipWhitespace();
       }
       if (i < 3) {
-        builder.suggest("^".repeat(3 - i), Component.translatable("enhanced_commands.argument.pos.local_coordinate.remaining"));
+        builder.suggest("^".repeat(3 - i), Component.translatable("enhanced_commands.pos.local_coordinate.remaining"));
       }
     } else {
       int i;
@@ -307,14 +307,14 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
         }
       }
       if (i < 3) {
-        builder.suggest("~".repeat(3 - i), i == 0 ? Component.translatable("enhanced_commands.argument.pos.relative_coordinate") : Component.translatable("enhanced_commands.argument.pos.relative_coordinate.remaining"));
+        builder.suggest("~".repeat(3 - i), i == 0 ? Component.translatable("enhanced_commands.pos.relative_coordinate") : Component.translatable("enhanced_commands.pos.relative_coordinate.remaining"));
         if (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1))) {
           // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
           if (crossHairBlockPos != null && !numberType.doubleOnly()) {
             switch (i) {
-              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int"));
-              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
-              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.pos.crosshair_int"));
+              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.pos.crosshair_int.remaining"));
+              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.pos.crosshair_int.remaining"));
             }
           }
           if (crossHairPos != null && !numberType.intOnly()) {
@@ -322,9 +322,9 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
             nf.setGroupingUsed(false);
             nf.setMaximumFractionDigits(Integer.MAX_VALUE);
             switch (i) {
-              case 0 -> builder.suggest(nf.format(crossHairPos.x()) + " " + nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double"));
-              case 1 -> builder.suggest(nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
-              case 2 -> builder.suggest(nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 0 -> builder.suggest(nf.format(crossHairPos.x()) + " " + nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.pos.crosshair_double"));
+              case 1 -> builder.suggest(nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.pos.crosshair_double.remaining"));
+              case 2 -> builder.suggest(nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.pos.crosshair_double.remaining"));
             }
           }
         }

@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class NbtFunctionTypes {
   private static final RegistryBridge<NbtFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtFunctionType.REGISTRY);
@@ -26,6 +27,7 @@ public final class NbtFunctionTypes {
   public static final NbtFunctionType<ConcatNbtFunction> CONCAT = register("concat", ConcatNbtFunction.CODEC);
   public static final NbtFunctionType<GetDataNbtFunction> GET_DATA = register("get_data", GetDataNbtFunction.CODEC);
   public static final NbtFunctionType<PosNbtFunction> POS = register("pos", PosNbtFunction.CODEC);
+  public static final NbtFunctionType<ReferenceNbtFunction> REFERENCE = register("reference", ReferenceNbtFunction.CODEC);
   public static final NbtFunctionType<RegexReplaceNbtFunction> REGEX_REPLACE = register("regex_replace", RegexReplaceNbtFunction.CODEC);
   public static final NbtFunctionType<ReplaceNbtFunction> REPLACE = register("replace", ReplaceNbtFunction.CODEC);
   public static final NbtFunctionType<StringReplaceNbtFunction> STRING_REPLACE = register("string_replace", StringReplaceNbtFunction.CODEC);
@@ -52,6 +54,7 @@ public final class NbtFunctionTypes {
     functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayNbtFunction.Parser::new);
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickNbtFunction.Parser::new);
     functionsParser.register("pos", Component.translatable("enhanced_commands.nbt_function.pos"), PosNbtFunction.Parser::new);
+    functionsParser.register("reference", Component.translatable("enhanced_commands.nbt_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceNbtFunction.PREFIXED_ID_PARSER));
     functionsParser.register("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"), RegexReplaceNbtFunction.Parser::new);
     functionsParser.register("replace", Component.translatable("enhanced_commands.nbt_function.replace"), ReplaceNbtFunction.Parser::new);
     functionsParser.register("string_replace", Component.translatable("enhanced_commands.nbt_function.string_replace"), StringReplaceNbtFunction.Parser::new);

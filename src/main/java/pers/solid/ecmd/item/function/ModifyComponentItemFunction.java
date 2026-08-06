@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.util.ExecutionContext;
 
+import java.util.List;
+
 public record ModifyComponentItemFunction<T>(DataComponentType<T> component, NbtFunction function) implements ItemFunctionEntry {
   public static final MapCodec<ModifyComponentItemFunction<?>> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       DataComponentType.CODEC.fieldOf("component").forGetter(ModifyComponentItemFunction::component),
@@ -55,5 +57,10 @@ public record ModifyComponentItemFunction<T>(DataComponentType<T> component, Nbt
   @Override
   public String asEntryString() {
     return BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ": " + function.expressAsString();
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(function);
   }
 }

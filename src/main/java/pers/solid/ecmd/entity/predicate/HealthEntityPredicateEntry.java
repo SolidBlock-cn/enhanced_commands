@@ -9,8 +9,9 @@ import net.minecraft.world.entity.LivingEntity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record HealthEntityPredicateEntry(BridgeFloatRange health, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record HealthEntityPredicateEntry(BridgeFloatRange health, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<HealthEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeFloatRange.CODEC.fieldOf("health").forGetter(HealthEntityPredicateEntry::health),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(HealthEntityPredicateEntry::inverted)

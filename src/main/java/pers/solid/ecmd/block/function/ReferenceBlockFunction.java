@@ -16,6 +16,7 @@ import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) implements BlockFunction, ReferenceEntry<BlockFunction> {
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(DefaultNamespace.ENHANCED_COMMANDS.idCodec(true), BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
+  public static final PrefixedIdParser<ReferenceBlockFunction, BlockFunction> PREFIXED_ID_PARSER = new PrefixedIdParser<>('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
   @Override
   public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
@@ -33,16 +34,4 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) 
     return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
   }
 
-  public static class ReferencePrefixedParser extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> {
-    public static final ReferencePrefixedParser INSTANCE = new ReferencePrefixedParser();
-
-    protected ReferencePrefixedParser() {
-      super('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY);
-    }
-
-    @Override
-    protected ReferenceBlockFunction getResultByReference(Holder.Reference<BlockFunction> holderReference) {
-      return new ReferenceBlockFunction(holderReference);
-    }
-  }
 }

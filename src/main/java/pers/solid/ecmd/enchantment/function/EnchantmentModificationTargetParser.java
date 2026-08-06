@@ -99,7 +99,7 @@ public final class EnchantmentModificationTargetParser {
       case 0 -> HolderSet.<Enchantment>empty();
       case 1 -> input.getFirst();
       default -> HolderSet.direct(input.stream().flatMap(HolderSet::stream).toList());
-    }, "|", Component.translatable("enhanced_commands.argument.enchantment_modification"), parseContext);
+    }, "|", Component.translatable("enhanced_commands.enchantments_function"), parseContext);
   }
 
   public static <S> HolderSet<Enchantment> parseEnchantmentOrTag(ParseContext<S> parseContext) throws CommandSyntaxException {

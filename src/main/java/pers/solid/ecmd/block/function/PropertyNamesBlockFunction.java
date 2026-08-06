@@ -17,12 +17,12 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) implements BlockFunction {
+public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) implements BlockFunction, DoesNotRequireValidation {
   public static final MapCodec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
   public PropertyNamesBlockFunction(PropertyNameFunction... functions) {
@@ -46,11 +46,6 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   @Override
   public BlockFunctionType<PropertyNamesBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public enum PropertyNamesParser implements Parser<PropertyNamesBlockFunction> {

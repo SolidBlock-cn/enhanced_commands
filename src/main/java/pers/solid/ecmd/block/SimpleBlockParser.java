@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockParser<S> {
-  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.block_predicate.unknown_comparator", o));
+  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.block_predicate.unknown_comparator", o));
   public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_predicate.comparator_expected"));
   public static final Component START_OF_PROPERTIES = Component.translatable("enhanced_commands.block_predicate.start_of_properties");
   public static final Component NEXT_PROPERTY = Component.translatable("enhanced_commands.block_predicate.next_property");

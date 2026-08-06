@@ -9,10 +9,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
-
-public enum EmptyBlockFunction implements BlockFunction {
+public enum EmptyBlockFunction implements BlockFunction, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<EmptyBlockFunction> CODEC = MapCodec.unit(INSTANCE);
 
@@ -29,10 +28,5 @@ public enum EmptyBlockFunction implements BlockFunction {
   @Override
   public String expressAsString() {
     return "~";
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 }

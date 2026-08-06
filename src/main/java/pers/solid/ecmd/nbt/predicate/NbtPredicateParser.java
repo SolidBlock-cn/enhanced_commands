@@ -309,10 +309,18 @@ public final class NbtPredicateParser {
   private static <S> NbtPredicate parseUnit(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeUnit = reader.getCursor();
+
+    // 解析函数语法
     final NbtPredicate functionGrammar = NbtPredicateParser.parseFunctionGrammar(parseContext, reader);
     parseContext.addSuggestion((context, builder) -> suggestValueDifferentTypes(builder.createOffset(cursorBeforeUnit)));
     if (functionGrammar != null) {
       return functionGrammar;
+    }
+
+    // 解析引用语法
+    final ReferenceNbtPredicate reference = ReferenceNbtPredicate.PREFIXED_ID_PARSER.parse(parseContext);
+    if (reference != null) {
+      return reference;
     }
 
     if (!reader.canRead()) {

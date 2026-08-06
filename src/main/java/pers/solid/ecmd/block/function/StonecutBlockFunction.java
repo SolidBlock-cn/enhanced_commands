@@ -80,7 +80,7 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<StonecutBlockFunction> {
-    private BlockFunction blockFunction = null;
+    private @Nullable BlockFunction blockFunction = null;
 
     @Override
     public StonecutBlockFunction getParseResult(ParseContext<?> parseContext) {

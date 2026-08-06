@@ -10,8 +10,9 @@ import pers.solid.ecmd.mixins.accessor.FoodDataAccessor;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<ExhaustionEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeFloatRange.CODEC.fieldOf("exhaustion").forGetter(ExhaustionEntityPredicateEntry::exhaustion),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(ExhaustionEntityPredicateEntry::inverted)

@@ -7,8 +7,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public enum SenderOnlyEntityPredicate implements SpecialEntityPredicate {
+public enum SenderOnlyEntityPredicate implements SpecialEntityPredicate, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<SenderOnlyEntityPredicate> CODEC = MapCodec.unit(INSTANCE);
 

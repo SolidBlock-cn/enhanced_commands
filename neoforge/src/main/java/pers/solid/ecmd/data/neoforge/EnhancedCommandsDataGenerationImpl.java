@@ -15,7 +15,7 @@ import pers.solid.ecmd.item.predicate.ItemPredicate;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.number.EnhancedCommandsNumberProvider;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.RegionProvider;
 
 import java.util.Set;
 
@@ -35,7 +35,7 @@ public class EnhancedCommandsDataGenerationImpl {
             .add(NbtFunction.REGISTRY_KEY, registryBootstrapFor(new NbtFunctionDataGeneration()))
             .add(NbtPredicate.REGISTRY_KEY, registryBootstrapFor(new NbtPredicateDataGeneration()))
             .add(EnhancedCommandsNumberProvider.REGISTRY_KEY, registryBootstrapFor(new NumberProviderDataGeneration()))
-            .add(Region.REGISTRY_KEY, registryBootstrapFor(new RegionDataGeneration())),
+            .add(RegionProvider.REGISTRY_KEY, registryBootstrapFor(new RegionProviderDataGeneration())),
         Set.of(EnhancedCommands.MOD_ID));
   }
 

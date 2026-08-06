@@ -9,8 +9,10 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record TagItemFunction(HolderSet<Item> tag) implements ItemFunction {
@@ -32,5 +34,10 @@ public record TagItemFunction(HolderSet<Item> tag) implements ItemFunction {
   public String expressAsString() {
     final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
     return "#" + tagString;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(tag);
   }
 }

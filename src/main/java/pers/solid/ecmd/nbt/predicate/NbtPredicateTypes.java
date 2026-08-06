@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
@@ -23,6 +24,9 @@ public class NbtPredicateTypes {
   public static final NbtPredicateType<NegatingNbtPredicate> NEGATING = register("negating", NegatingNbtPredicate.CODEC);
   public static final NbtPredicateType<RangeNbtPredicate> RANGE = register("exhaustion", RangeNbtPredicate.CODEC);
   public static final NbtPredicateType<RegexNbtPredicate> REGEX = register("regex", RegexNbtPredicate.CODEC);
+
+  // 特殊的 NBT 谓词
+  public static final NbtPredicateType<ReferenceNbtPredicate> REFERENCE = register("reference", ReferenceNbtPredicate.CODEC);
 
   private static <T extends NbtPredicate> NbtPredicateType<T> register(String name, MapCodec<T> codec) {
     return register(name, new NbtPredicateType.Simple<>(codec));
@@ -43,6 +47,7 @@ public class NbtPredicateTypes {
     final FunctionsParser<NbtPredicate> functionsParser = NbtPredicateParsing.FUNCTIONS_PARSER;
     functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllNbtPredicate.Parser::new);
     functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyNbtPredicate.Parser::new);
+    functionsParser.register("reference", Component.translatable("enhanced_commands.nbt_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceNbtPredicate.PREFIXED_ID_PARSER));
     functionsParser.register("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"), RegexNbtPredicate.Parser::new);
   }
 }

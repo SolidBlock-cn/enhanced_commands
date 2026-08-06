@@ -18,6 +18,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * @see TagBlockPredicate#properties
  */
-public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicates) implements BlockPredicate {
+public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicates) implements BlockPredicate, DoesNotRequireValidation {
   public static final MapCodec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   @Override
@@ -72,10 +73,6 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return List.of();
-  }
 
   public enum PropertyNamesParser implements Parser<PropertiesNamesBlockPredicate> {
     INSTANCE;

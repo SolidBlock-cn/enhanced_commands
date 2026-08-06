@@ -10,8 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public final class RandomItemFunction implements ItemFunction {
+public final class RandomItemFunction implements ItemFunction, DoesNotRequireValidation {
   public static final MapCodec<RandomItemFunction> CODEC = MapCodec.unit(RandomItemFunction::new);
 
   private transient @Nullable FeatureFlagSet featureSet;

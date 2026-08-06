@@ -10,6 +10,7 @@ public final class EnchantmentModificationTypes {
 
   public static final EnchantmentModificationType<AddEnchantmentsFunction> ADD = register("add", AddEnchantmentsFunction.CODEC);
   public static final EnchantmentModificationType<NaturalEnchantmentsFunction> NATURAL = register("natural", NaturalEnchantmentsFunction.CODEC);
+  public static final EnchantmentModificationType<ReferenceEnchantmentsFunction> REFERENCE = register("reference", ReferenceEnchantmentsFunction.CODEC);
   public static final EnchantmentModificationType<RemoveEnchantmentsFunction> REMOVE = register("remove", RemoveEnchantmentsFunction.CODEC);
 
   private static <T extends EnchantmentsFunction> EnchantmentModificationType<T> register(String name, MapCodec<T> codec) {

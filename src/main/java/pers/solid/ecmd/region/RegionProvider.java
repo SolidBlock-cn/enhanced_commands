@@ -3,6 +3,9 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -12,6 +15,7 @@ import pers.solid.ecmd.util.PositionProvider;
  * @see net.minecraft.commands.arguments.coordinates.Coordinates
  */
 public interface RegionProvider<R extends Region> extends ExpressionConvertible {
+  ResourceKey<Registry<RegionProvider<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_provider"));
   Codec<RegionProvider<?>> CODEC = RegionType.CODEC.dispatch(RegionProvider::getType, RegionType::providerCodec);
 
   static RegionProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {

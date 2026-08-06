@@ -14,11 +14,11 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
 import java.util.Objects;
 
-public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunction {
+public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunction, DoesNotRequireValidation {
   public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorProvider.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
@@ -34,11 +34,6 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   @Override
   public BlockFunctionType<MirrorBlockFunction> getType() {
     return BlockFunctionTypes.MIRROR;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<MirrorBlockFunction> {

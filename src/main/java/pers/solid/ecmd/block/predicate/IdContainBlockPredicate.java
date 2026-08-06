@@ -15,12 +15,12 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate {
+public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate, DoesNotRequireValidation {
   public static final MapCodec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(IdContainBlockPredicate::new, ExtraCodecs.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   @Override
@@ -58,11 +58,6 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   @Override
   public int hashCode() {
     return pattern.pattern().hashCode();
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdContainBlockPredicate> {

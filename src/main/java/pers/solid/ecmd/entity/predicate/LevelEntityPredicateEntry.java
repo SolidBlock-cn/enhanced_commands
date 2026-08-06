@@ -9,8 +9,9 @@ import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record LevelEntityPredicateEntry(BridgeIntRange level, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record LevelEntityPredicateEntry(BridgeIntRange level, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<LevelEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeIntRange.CODEC.fieldOf("level").forGetter(LevelEntityPredicateEntry::level),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(LevelEntityPredicateEntry::inverted)

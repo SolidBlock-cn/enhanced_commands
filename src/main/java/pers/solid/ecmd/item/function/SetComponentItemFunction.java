@@ -7,8 +7,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record SetComponentItemFunction<T>(DataComponentType<T> component, T value) implements ItemFunctionEntry {
+public record SetComponentItemFunction<T>(DataComponentType<T> component, T value) implements ItemFunctionEntry, DoesNotRequireValidation {
   public static final MapCodec<SetComponentItemFunction<?>> CODEC = DataComponentType.CODEC.dispatchMap("component", SetComponentItemFunction::component, SetComponentItemFunction::codecForDataComponentType);
 
   @Override

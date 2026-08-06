@@ -20,13 +20,14 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
+public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction, DoesNotRequireValidation {
   public static final Codec<SimpleBlockFunction> STRING_BASED_CODEC = BuiltInRegistries.BLOCK.byNameCodec().flatComapMap(block -> new SimpleBlockFunction(block, ImmutableList.of()), simpleBlockFunction -> simpleBlockFunction.properties.isEmpty() ? DataResult.success(simpleBlockFunction.block) : DataResult.error(() -> "cannot serialize function with properties to strings"));
 
   public static final MapCodec<SimpleBlockFunction> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
@@ -59,11 +60,6 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   @Override
   public BlockFunctionType<SimpleBlockFunction> getType() {
     return BlockFunctionTypes.SIMPLE;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public enum SimpleParser implements Parser<BlockFunction> {

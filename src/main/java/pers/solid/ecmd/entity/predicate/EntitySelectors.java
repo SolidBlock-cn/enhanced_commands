@@ -25,6 +25,7 @@ import java.util.function.BiConsumer;
  * 此类包含了与实体选择器有关的一些实用方法，包括与序列化、文本转换相关的实用方法。
  */
 public final class EntitySelectors {
+
   private EntitySelectors() {
   }
 
@@ -38,6 +39,7 @@ public final class EntitySelectors {
     entitySelectorReader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
       suggestionsBuilderConsumer.accept(suggestionsBuilder);
       suggestionsBuilder.suggest("[");
+      suggestionsBuilder.suggest("$", EntitySelectorReaderExtras.REFERENCE_PARSER.tooltip);
       return suggestionsBuilder.buildFuture();
     });
     if (stringReader.canRead() && stringReader.peek() == '[') {

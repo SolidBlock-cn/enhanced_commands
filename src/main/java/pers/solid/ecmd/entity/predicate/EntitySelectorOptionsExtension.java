@@ -59,6 +59,7 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -595,6 +596,20 @@ public class EntitySelectorOptionsExtension {
       reader.addPredicate$ec(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), !inverted));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.sub_predicate.inverted"));
     INCOMPLETE_SUGGESTIONS.add("not");
+
+    // 用于 reference
+    putOption("reference", reader -> {
+      final boolean inverted = reader.shouldInvertValue();
+      final StringReader stringReader = reader.getReader();
+      final int cursorAfterId = stringReader.getCursor();
+      final ParseContext<?> parseContext = new ParseContext<>(null, stringReader, false, true);
+
+      final ReferenceEntry.PrefixedIdParser<ReferenceEntityPredicateEntry, EntityPredicate> referenceParser = EntitySelectorReaderExtras.REFERENCE_PARSER;
+      reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> referenceParser.getIdSuggestion(parseContext, reader.extension$ec().context, suggestionsBuilder, cursorAfterId));
+      final Holder.Reference<EntityPredicate> reference = referenceParser.parseAndGetReference(parseContext);
+      final ReferenceEntityPredicateEntry entry = new ReferenceEntityPredicateEntry(reference);
+      reader.addPredicate$ec(inverted ? new SubPredicateEntityPredicateEntry(entry, true) : entry);
+    }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.reference"));
   }
 
   @ApiStatus.Internal

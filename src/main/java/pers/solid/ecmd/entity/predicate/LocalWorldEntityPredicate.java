@@ -8,8 +8,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
+public enum LocalWorldEntityPredicate implements SpecialEntityPredicate, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<LocalWorldEntityPredicate> CODEC = MapCodec.unit(INSTANCE);
 

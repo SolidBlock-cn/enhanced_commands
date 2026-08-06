@@ -7,8 +7,9 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record RemoveComponentItemFunction<T>(DataComponentType<T> component) implements ItemFunctionEntry {
+public record RemoveComponentItemFunction<T>(DataComponentType<T> component) implements ItemFunctionEntry, DoesNotRequireValidation {
   public static final MapCodec<RemoveComponentItemFunction<?>> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       DataComponentType.CODEC.fieldOf("component").forGetter(RemoveComponentItemFunction::component)
   ).apply(i, RemoveComponentItemFunction::new));

@@ -23,16 +23,16 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.OptionalLong;
 import java.util.Set;
 
 /**
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。
  */
-public final class RandomBlockFunction implements BlockFunction {
+public final class RandomBlockFunction implements BlockFunction, DoesNotRequireValidation {
   public static final MapCodec<RandomBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.optionalLongFieldOf("seed").forGetter(RandomBlockFunction::seed)).apply(i, RandomBlockFunction::new));
   private transient @Nullable FeatureFlagSet featureSet;
   private transient Block @Nullable [] blocks;
@@ -97,11 +97,6 @@ public final class RandomBlockFunction implements BlockFunction {
   @Override
   public String toString() {
     return "RandomBlockFunction{}";
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public enum RandomParser implements Parser<RandomBlockFunction> {

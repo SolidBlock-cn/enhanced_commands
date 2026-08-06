@@ -20,11 +20,12 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record AdvancementsEntityPredicateEntry(Map<ResourceLocation, Either<Map<String, Boolean>, Boolean>> map) implements EntityPredicateEntry, StaticEntityPredicate {
+public record AdvancementsEntityPredicateEntry(Map<ResourceLocation, Either<Map<String, Boolean>, Boolean>> map) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<AdvancementsEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(Codec.unboundedMap(Codec.STRING, Codec.BOOL), Codec.BOOL)).fieldOf("advancements").forGetter(AdvancementsEntityPredicateEntry::map)
   ).apply(i, AdvancementsEntityPredicateEntry::new));

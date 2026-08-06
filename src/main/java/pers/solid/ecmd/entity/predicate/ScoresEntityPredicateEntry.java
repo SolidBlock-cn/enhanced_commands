@@ -13,11 +13,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPredicateEntry, StaticEntityPredicate {
+public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<ScoresEntityPredicateEntry> CODEC = Entry.CODEC.listOf().fieldOf("scores").xmap(ScoresEntityPredicateEntry::new, ScoresEntityPredicateEntry::scores);
 
   @Override

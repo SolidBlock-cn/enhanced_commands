@@ -6,8 +6,9 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredicateEntry {
+public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredicateEntry, DoesNotRequireValidation {
   INSTANCE;
   public static final MapCodec<AliveEntityPredicate> CODEC = MapCodec.unit(INSTANCE);
 

@@ -39,7 +39,7 @@ import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateTypes;
 import pers.solid.ecmd.number.EnhancedCommandsNumberProvider;
 import pers.solid.ecmd.number.NumberProviderParser;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
@@ -107,8 +107,13 @@ public class EnhancedCommands {
 
     registry.put(BlockFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_FUNCTION_ID);
     registry.put(BlockPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_PREDICATE_ID);
+    registry.put(NbtFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_NBT_FUNCTION_ID);
+    registry.put(NbtPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_NBT_PREDICATE_ID);
+    registry.put(EntityPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ENTITY_PREDICATE_ID);
+    registry.put(RegionProvider.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_REGION_PROVIDER_ID);
     registry.put(ItemFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_FUNCTION_ID);
     registry.put(ItemPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_PREDICATE_ID);
+    registry.put(EnchantmentsFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ENCHANTMENTS_FUNCTION_ID);
   }
 
   /**
@@ -128,7 +133,7 @@ public class EnhancedCommands {
     EnhancedServerReloadableRegistries.register(NbtFunction.REGISTRY_KEY, NbtFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(NbtPredicate.REGISTRY_KEY, NbtPredicate.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(EnhancedCommandsNumberProvider.REGISTRY_KEY, NumberProviders.CODEC, false, context);
-    EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(RegionProvider.REGISTRY_KEY, RegionProvider.CODEC, false, context);
   }
 
   @ExpectPlatform

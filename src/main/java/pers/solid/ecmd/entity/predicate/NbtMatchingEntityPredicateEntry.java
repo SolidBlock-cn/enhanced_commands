@@ -11,8 +11,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record NbtMatchingEntityPredicateEntry(CompoundTag nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record NbtMatchingEntityPredicateEntry(CompoundTag nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<NbtMatchingEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CompoundTag.CODEC.fieldOf("nbt").forGetter(NbtMatchingEntityPredicateEntry::nbt),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(NbtMatchingEntityPredicateEntry::inverted)

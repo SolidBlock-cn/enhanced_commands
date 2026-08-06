@@ -124,7 +124,7 @@ public sealed interface EnchantmentModificationTarget {
       this.presentOnly = presentOnly;
       this.all = all;
       this.name = name;
-      this.description = Component.translatable("enhanced_commands.argument.enchantment_modification.special." + name);
+      this.description = Component.translatable("enhanced_commands.enchantments_function.special." + name);
     }
 
     @Override

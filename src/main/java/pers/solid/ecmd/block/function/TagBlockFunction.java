@@ -22,13 +22,14 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
 import pers.solid.ecmd.util.DefaultNamespace;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> properties) implements BlockFunction {
+public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> properties) implements BlockFunction, DoesNotRequireValidation {
   public static final Codec<TagBlockFunction> STRING_BASED_CODEC = RegistryCodecs.homogeneousList(Registries.BLOCK, true).flatComapMap(TagBlockFunction::new, tagBlockFunction -> tagBlockFunction.properties.isEmpty() ? DataResult.success(tagBlockFunction.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
   public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK, true).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
@@ -62,11 +63,6 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
   @Override
   public BlockFunctionType<TagBlockFunction> getType() {
     return BlockFunctionTypes.TAG;
-  }
-
-  @Override
-  public Iterable<? extends @Nullable Object> membersToValidate() {
-    return Collections.emptyList();
   }
 
   public enum TagParser implements Parser<TagBlockFunction> {

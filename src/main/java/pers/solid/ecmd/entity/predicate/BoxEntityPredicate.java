@@ -12,8 +12,9 @@ import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
+public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements SpecialEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(AABB.unitCubeFromLowerCorner(Vec3.ZERO), PositionOffsetInfo.NO_OP));
   private static final LoadingCache<BoxEntityPredicate, LoadingCache<Vec3, AABB>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.move(input.offset.apply(vec3d))))));
 

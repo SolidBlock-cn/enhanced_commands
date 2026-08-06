@@ -152,7 +152,7 @@ public final class ItemFunctionParser {
         case '$' -> {
           reader.skip();
           parseContext.clearSuggestion();
-          final ReferenceItemFunction.ReferencePrefixedParser parser = ReferenceItemFunction.ReferencePrefixedParser.INSTANCE;
+          final var parser = ReferenceItemFunction.PREFIXED_ID_PARSER;
           final Holder.Reference<ItemFunction> holderReference = parser.parseAndGetReference(parseContext);
           return parser.getResultByReference(holderReference);
         }
@@ -359,7 +359,7 @@ public final class ItemFunctionParser {
 
   private static CompletableFuture<Suggestions> suggestComponentAssignmentOrRemoval(SuggestionsBuilder builder) {
     if (builder.getRemaining().isEmpty()) {
-      builder.suggest("!", Component.translatable("enhanced_commands.argument.item_function.remove_component"));
+      builder.suggest("!", Component.translatable("enhanced_commands.item_function.remove_component"));
     }
     return suggestComponentIds(builder, "=");
   }
@@ -385,23 +385,23 @@ public final class ItemFunctionParser {
 
   private static CompletableFuture<Suggestions> suggestEqualOrColon(SuggestionsBuilder builder) {
     if (builder.getRemaining().isEmpty()) {
-      builder.suggest("=", Component.translatable("enhanced_commands.argument.item_function.set_component_value"));
-      builder.suggest(":", Component.translatable("enhanced_commands.argument.item_function.modify_component_value"));
+      builder.suggest("=", Component.translatable("enhanced_commands.item_function.set_component_value"));
+      builder.suggest(":", Component.translatable("enhanced_commands.item_function.modify_component_value"));
     }
     return builder.buildFuture();
   }
 
   private static CompletableFuture<Suggestions> suggestStartComponents(SuggestionsBuilder builder) {
     if (builder.getRemaining().isEmpty()) {
-      builder.suggest("[", Component.translatable("enhanced_commands.argument.item_function.start_component_modification"));
+      builder.suggest("[", Component.translatable("enhanced_commands.item_function.start_component_modification"));
     }
     return builder.buildFuture();
   }
 
   private static CompletableFuture<Suggestions> suggestNextOrEndComponents(SuggestionsBuilder builder) {
     if (builder.getRemaining().isEmpty()) {
-      builder.suggest(",", Component.translatable("enhanced_commands.argument.item_function.separate_component_modification"));
-      builder.suggest("]", Component.translatable("enhanced_commands.argument.item_function.end_component_modification"));
+      builder.suggest(",", Component.translatable("enhanced_commands.item_function.separate_component_modification"));
+      builder.suggest("]", Component.translatable("enhanced_commands.item_function.end_component_modification"));
     }
     return builder.buildFuture();
   }

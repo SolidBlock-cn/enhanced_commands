@@ -43,6 +43,7 @@ public final class EntityPredicateTypes {
   public static final EntityPredicateType<PlayerOnlyEntityPredicate> PLAYER_ONLY = registerSimple("player_only", PlayerOnlyEntityPredicate.CODEC);
   public static final EntityPredicateType<PoseEntityPredicateEntry> POSE = registerSimple("pose", PoseEntityPredicateEntry.CODEC);
   public static final SimpleBooleanEntityPredicateType ON_FIRE = registerSimpleBoolean("on_fire", Entity::isOnFire);
+  public static final EntityPredicateType<ReferenceEntityPredicateEntry> REFERENCE = registerSimple("reference", ReferenceEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<RegionEntityPredicateEntry> REGION = registerSimple("region", RegionEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<SaturationEntityPredicateEntry> SATURATION = registerSimple("saturation", SaturationEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<ScoresEntityPredicateEntry> SCORE = registerSimple("scores", ScoresEntityPredicateEntry.CODEC);

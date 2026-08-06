@@ -8,10 +8,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
 
-public record CollectorEntityPredicate(EntitySelectorCollector collector) implements SpecialEntityPredicate {
+public record CollectorEntityPredicate(EntitySelectorCollector collector) implements SpecialEntityPredicate, DoesNotRequireValidation {
   public static final MapCodec<CollectorEntityPredicate> CODEC = EntitySelectorCollector.CODEC.fieldOf("collector").xmap(CollectorEntityPredicate::new, CollectorEntityPredicate::collector);
   private static final LoadingCache<EntitySelectorCollector, LoadingCache<Entity, List<? extends Entity>>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(collector -> CacheBuilder.newBuilder().weakKeys().build(CacheLoader.from(entity -> collector.collectEntities(entity).toList()))));
 

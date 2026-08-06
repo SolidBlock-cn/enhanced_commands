@@ -8,8 +8,9 @@ import net.minecraft.world.entity.Entity;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
   public static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.fire");
   public static final MapCodec<FireEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeIntRange.CODEC.fieldOf("time").forGetter(FireEntityPredicateEntry::time),
