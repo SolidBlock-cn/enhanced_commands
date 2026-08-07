@@ -10,7 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -19,14 +18,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.phys.Vec2;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.BlockPredicateArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
 
@@ -90,7 +91,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     if (blockInWorld.getState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgument.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
+    final TestResult testResult = BlockPredicateArgument.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source, seed));
     testResult.makeFeedback(source);
     return BooleanUtils.toInteger(testResult.successes());
   }

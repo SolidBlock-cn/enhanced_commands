@@ -4,7 +4,10 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.fabric.InitializeContextImpl;
@@ -39,5 +42,7 @@ public class EnhancedCommandsImpl implements ModInitializer {
   @Override
   public void onInitialize() {
     EnhancedCommands.init(new InitializeContextImpl());
+
+    ResourceManagerHelper.registerBuiltinResourcePack(EnhancedCommands.id("examples"), FabricLoader.getInstance().getModContainer(EnhancedCommands.MOD_ID).orElseThrow(), Component.translatable("enhanced_commands.pack.examples"), ResourcePackActivationType.NORMAL);
   }
 }

@@ -922,6 +922,8 @@
   "enhanced_commands.outline_type.outline_connected": "Block positions near at least one (in 26) that is not in",
   "enhanced_commands.outline_type.wall": "Block positions horizontally next to at least one (in 4) that is not in",
   "enhanced_commands.outline_type.wall_connected": "Block positions horizontally near at least one (in 8) that is not in",
+  "enhanced_commands.pack.examples": "Example Data Pack of Enhanced Commands Mod",
+  "enhanced_commands.pack.examples.description": "Used to demonstrate and test the data-driven contents of Enhanced Commands mod.",
   "enhanced_commands.param_too_few": "The number of parameters (%s) is lower than the limit (%s)",
   "enhanced_commands.param_too_many": "The number of parameters (%s) exceeds the limit (%s)",
   "enhanced_commands.parsing.angle_accepted_values": "'deg', 'rad' or 'turn'",
