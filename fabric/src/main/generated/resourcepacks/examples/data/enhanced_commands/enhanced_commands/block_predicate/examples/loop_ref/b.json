@@ -1,0 +1,7 @@
+{
+  "type": "test_block_function",
+  "block_function": {
+    "type": "reference",
+    "reference": "examples/loop_ref/a"
+  }
+}

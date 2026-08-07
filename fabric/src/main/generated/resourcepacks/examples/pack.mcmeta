@@ -1,0 +1,8 @@
+{
+  "pack": {
+    "description": {
+      "translate": "enhanced_commands.pack.examples.description"
+    },
+    "pack_format": 48
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tag",
+  "properties": [
+    {
+      "type": "all_random",
+      "except": []
+    },
+    {
+      "type": "simple",
+      "property": "waterlogged",
+      "value": "false"
+    }
+  ],
+  "tag": "#minecraft:stairs"
+}
