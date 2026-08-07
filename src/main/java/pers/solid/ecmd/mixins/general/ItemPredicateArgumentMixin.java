@@ -108,7 +108,7 @@ public abstract class ItemPredicateArgumentMixin {
 
     @ModifyReturnValue(method = "forTagType(Lcom/mojang/brigadier/ImmutableStringReader;Lnet/minecraft/resources/ResourceLocation;)Ljava/util/function/Predicate;", at = @At("RETURN"))
     private Predicate<ItemStack> modifyPredicateForTagType(Predicate<ItemStack> original, @Local HolderSet<Item> holderSet) {
-      return ItemPredicate.asVanillaPredicate(new TagItemPredicate(holderSet), original);
+      return ItemPredicate.asVanillaPredicate(new TagItemPredicate((HolderSet.Named<Item>) holderSet), original);
     }
 
     @ModifyReturnValue(method = "negate(Ljava/util/function/Predicate;)Ljava/util/function/Predicate;", at = @At("RETURN"))

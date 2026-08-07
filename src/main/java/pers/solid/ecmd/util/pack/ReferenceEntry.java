@@ -26,6 +26,7 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
+import pers.solid.ecmd.util.codec.SafeReferenceCodec;
 import pers.solid.ecmd.util.pack.problems.RecursiveReferenceProblem;
 import pers.solid.ecmd.util.pack.problems.ValidationProblem;
 

@@ -1,28 +1,19 @@
 package pers.solid.ecmd.item.predicate;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import pers.solid.ecmd.util.DefaultNamespace;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
-import java.util.stream.Collectors;
+public record TagItemPredicate(HolderSet.Named<Item> items) implements ItemPredicateWithoutContext {
+  public static final Codec<TagItemPredicate> STRING_BASED_CODEC = CodecUtil.holderSetNamed(Registries.ITEM).xmap(TagItemPredicate::new, TagItemPredicate::items);
 
-public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWithoutContext {
-  public static final Codec<TagItemPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.ITEM).<HolderSet<Item>>flatXmap(tagKey -> BuiltInRegistries.ITEM.get(tagKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag: " + tagKey.location())), items -> items.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).xmap(TagItemPredicate::new, TagItemPredicate::items);
-
-  public static final MapCodec<TagItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("items").forGetter(TagItemPredicate::items)).apply(i, TagItemPredicate::new));
-
-  public TagItemPredicate(TagKey<Item> tagKey) {
-    this(BuiltInRegistries.ITEM.get(tagKey).orElseThrow(() -> new RuntimeException("Item " + tagKey + " not found!")));
-  }
+  public static final MapCodec<TagItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.holderSetNamed(Registries.ITEM).fieldOf("items").forGetter(TagItemPredicate::items)).apply(i, TagItemPredicate::new));
 
   @Override
   public boolean test(ItemStack stack) {
@@ -36,6 +27,6 @@ public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWi
 
   @Override
   public String expressAsString() {
-    return items.unwrap().map(itemTagKey -> "#" + itemTagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
+    return "#" + DefaultNamespace.MINECRAFT.toSimplerString(items.key().location());
   }
 }

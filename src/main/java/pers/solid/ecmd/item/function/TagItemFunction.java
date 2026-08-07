@@ -3,21 +3,20 @@ package pers.solid.ecmd.item.function;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public record TagItemFunction(HolderSet<Item> tag) implements ItemFunction {
+public record TagItemFunction(HolderSet.Named<Item> tag) implements ItemFunction {
   public static final MapCodec<TagItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("tag").forGetter(TagItemFunction::tag)
+      CodecUtil.holderSetNamed(Registries.ITEM).fieldOf("tag").forGetter(TagItemFunction::tag)
   ).apply(i, TagItemFunction::new));
 
   @Override
@@ -32,8 +31,7 @@ public record TagItemFunction(HolderSet<Item> tag) implements ItemFunction {
 
   @Override
   public String expressAsString() {
-    final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
-    return "#" + tagString;
+    return "#" + DefaultNamespace.MINECRAFT.toSimplerString(tag.key().location());
   }
 
   @Override

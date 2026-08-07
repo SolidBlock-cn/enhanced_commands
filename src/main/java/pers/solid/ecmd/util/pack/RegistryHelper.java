@@ -36,7 +36,7 @@ public final class RegistryHelper {
   }
 
   @SuppressWarnings("deprecation")
-  public static <T> HolderSet<T> emptyNamedSet(TagKey<T> tagKey) {
+  public static <T> HolderSet.Named<T> emptyNamedSet(TagKey<T> tagKey) {
     return HolderSet.emptyNamed(safeHolderOwner(), tagKey);
   }
 

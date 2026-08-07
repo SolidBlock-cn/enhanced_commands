@@ -13,10 +13,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
@@ -60,6 +57,6 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + types.stream().map(either -> either.map(type -> BuiltInRegistries.ENTITY_TYPE.getKey(type).toString(), tag -> "#" + tag.location())).collect(Collectors.joining("|"));
+    return "type=" + (inverted ? "!" : "") + types.stream().map(either -> either.map(type -> DefaultNamespace.MINECRAFT.toSimplerString(BuiltInRegistries.ENTITY_TYPE.getKey(type)), tag -> "#" + DefaultNamespace.MINECRAFT.toSimplerString(tag.location()))).collect(Collectors.joining("|"));
   }
 }

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyFunction;
+import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
@@ -38,7 +39,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
 
   @Override
   public String expressAsString() {
-    final StringBuilder stringBuilder = new StringBuilder(BuiltInRegistries.BLOCK.getKey(block).toString());
+    final StringBuilder stringBuilder = new StringBuilder(DefaultNamespace.MINECRAFT.toSimplerString(BuiltInRegistries.BLOCK.getKey(block)));
     if (!properties.isEmpty()) {
       stringBuilder.append('[');
       stringBuilder.append(properties.stream().map(PropertyFunction::expressAsString).collect(Collectors.joining(", ")));

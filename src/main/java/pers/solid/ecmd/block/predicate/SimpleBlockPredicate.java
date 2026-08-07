@@ -38,7 +38,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
 
   @Override
   public String expressAsString() {
-    final String id = BuiltInRegistries.BLOCK.getKey(block).toString();
+    final String id = DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(BuiltInRegistries.BLOCK.getKey(block));
     return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "[", "]"));
   }
 
