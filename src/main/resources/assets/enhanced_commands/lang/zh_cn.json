@@ -922,6 +922,8 @@
   "enhanced_commands.outline_type.outline_connected": "方块位置接近的26个中至少1个不在里面",
   "enhanced_commands.outline_type.wall": "方块位置水平方向毗邻的4个中至少1个不在里面",
   "enhanced_commands.outline_type.wall_connected": "方块位置水平方向接近的8个中至少1个不在里面",
+  "enhanced_commands.pack.examples": "增强命令模组示例数据包",
+  "enhanced_commands.pack.examples.description": "用于演示和测试增强命令模组中的数据驱动内容。",
   "enhanced_commands.param_too_few": "参数的数量（%s）低于限制（%s）",
   "enhanced_commands.param_too_many": "参数的数量（%s）超过限制（%s）",
   "enhanced_commands.parsing.angle_accepted_values": "“deg”、“rad”或“turn”",

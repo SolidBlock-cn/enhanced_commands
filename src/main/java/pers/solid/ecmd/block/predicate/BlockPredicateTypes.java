@@ -33,6 +33,8 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<CheckerboardBlockPredicate> CHECKERBOARD = register("checkerboard", CheckerboardBlockPredicate.CODEC);
   public static final BlockPredicateType<ReferenceBlockPredicate> REFERENCE = register("reference", ReferenceBlockPredicate.CODEC, ReferenceBlockPredicate.PREFIXED_ID_PARSER);
 
+  public static final BlockPredicateType<TestBlockFunctionBlockPredicate> TEST_BLOCK_FUNCTION = register("test_block_function", TestBlockFunctionBlockPredicate.CODEC);
+
   private BlockPredicateTypes() {
   }
 
