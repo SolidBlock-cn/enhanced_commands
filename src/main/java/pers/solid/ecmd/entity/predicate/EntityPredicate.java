@@ -40,7 +40,7 @@ public interface EntityPredicate extends ExpressionConvertible, RequiresValidati
   static EntityPredicate simplifiedBySelector(EntitySelector selector) {
     final var accessor = (EntitySelectorAccessor) selector;
 
-    if (selector.isWorldLimited() || !selector.includesEntities()) {
+    if (selector.isWorldLimited() || !selector.includesEntities() || selector.getMaxResults() < Integer.MAX_VALUE) {
       return new SelectorEntityPredicate(selector);
     }
 
@@ -51,12 +51,12 @@ public interface EntityPredicate extends ExpressionConvertible, RequiresValidati
     final boolean hasBox = accessor.getAabb() != null;
     final boolean senderOnly = selector.isSelfSelector();
     final List<Predicate<Entity>> predicates = accessor.getContextFreePredicates();
-    if ((collector != null
+    if (collector != null
         || hasDistance
         || hasBox
         || playerName != null
         || uuid != null
-        || senderOnly)) {
+        || senderOnly) {
       // 如果有任何特殊属性，且特殊属性只有一个，且没有谓词，则直接返回该特殊属性。
       // 如果有不止一个特殊属性，或者既有特殊属性也有谓词，则最后返回selector。
       if (predicates.isEmpty()) {
