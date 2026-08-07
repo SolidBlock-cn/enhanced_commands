@@ -10,7 +10,12 @@ import com.mojang.serialization.*;
 import net.minecraft.Util;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.nbt.*;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +28,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。
@@ -225,22 +229,14 @@ public final class CodecUtil {
     return Codec.LONG.optionalFieldOf(name).xmap(ol -> ol.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isEmpty() ? Optional.empty() : Optional.of(optionalLong.getAsLong()));
   }
 
-  public static <T> MapCodec<T> unimplementedMapCodec(String message) {
-    return new MapCodec<>() {
-      @Override
-      public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
-        return Stream.empty();
-      }
-
-      @Override
-      public <T1> DataResult<T> decode(DynamicOps<T1> ops, MapLike<T1> input) {
-        return DataResult.error(() -> message);
-      }
-
-      @Override
-      public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
-        return prefix.withErrorsFrom(DataResult.error(() -> message));
-      }
-    };
+  /**
+   * <p>解析标签 ID 的 codec，在解析时需要使用 {@link RegistryOps}。当标签不存在时，将解析失败。
+   * <p>与 {@link RegistryCodecs#homogeneousList(ResourceKey)} 不同的是，这个 codec 除了不允许内联元素之外，也不允许内联列表，仅允许指定标签。
+   */
+  public static <T> Codec<HolderSet.Named<T>> holderSetNamed(ResourceKey<? extends Registry<T>> registryKey) {
+    return RegistryCodecs.homogeneousList(registryKey, true).comapFlatMap(
+        holderSet -> holderSet instanceof HolderSet.Named<T> named ? DataResult.success(named) : DataResult.error(() -> "Inline list not allowed here."),
+        Function.identity()
+    );
   }
 }

@@ -8,10 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate, DoesNotRequireValidation {
@@ -51,6 +48,6 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + "#" + tag.location();
+    return "type=" + (inverted ? "!" : "") + "#" + DefaultNamespace.MINECRAFT.toSimplerString(tag.location());
   }
 }

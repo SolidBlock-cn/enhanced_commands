@@ -207,7 +207,7 @@ public final class ItemFunctionParser {
     final ResourceLocation tagId = ResourceLocation.read(reader);
     final int cursorAfterId = reader.getCursor();
 
-    final HolderSet<Item> holders = lookup.get(TagKey.create(Registries.ITEM, tagId)).orElseThrow(() -> {
+    final HolderSet.Named<Item> holders = lookup.get(TagKey.create(Registries.ITEM, tagId)).orElseThrow(() -> {
       reader.setCursor(cursorBeforeHash);
       return EnhancedCommandSyntaxException.withCursorEnd(ERROR_UNKNOWN_TAG.createWithContext(reader, tagId), cursorAfterId);
     });

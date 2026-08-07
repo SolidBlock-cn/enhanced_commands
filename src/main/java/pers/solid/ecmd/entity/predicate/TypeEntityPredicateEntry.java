@@ -8,10 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Objects;
@@ -54,6 +51,6 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+    return "type=" + (inverted ? "!" : "") + DefaultNamespace.MINECRAFT.toSimplerString(BuiltInRegistries.ENTITY_TYPE.getKey(entityType));
   }
 }

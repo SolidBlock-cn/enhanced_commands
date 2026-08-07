@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import pers.solid.ecmd.util.DefaultNamespace;
 
 public record SimpleItemPredicate(Item item) implements ItemPredicateWithoutContext {
   public static final Codec<SimpleItemPredicate> STRING_BASED_CODEC = BuiltInRegistries.ITEM.byNameCodec().xmap(SimpleItemPredicate::new, SimpleItemPredicate::item);
@@ -24,6 +25,6 @@ public record SimpleItemPredicate(Item item) implements ItemPredicateWithoutCont
 
   @Override
   public String expressAsString() {
-    return BuiltInRegistries.ITEM.getKey(item).toString();
+    return DefaultNamespace.MINECRAFT.toSimplerString(BuiltInRegistries.ITEM.getKey(item));
   }
 }

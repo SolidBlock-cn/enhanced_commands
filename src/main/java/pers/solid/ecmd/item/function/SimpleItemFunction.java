@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public record SimpleItemFunction(Holder<Item> item) implements ItemFunction {
 
   @Override
   public String expressAsString() {
-    return item.getRegisteredName();
+    return item.unwrap().map(itemResourceKey -> DefaultNamespace.MINECRAFT.toSimplerString(itemResourceKey.location()), item -> "[unregistered]");
   }
 
   @Override

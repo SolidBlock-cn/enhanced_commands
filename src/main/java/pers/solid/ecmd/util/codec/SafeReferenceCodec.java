@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util.pack;
+package pers.solid.ecmd.util.codec;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -12,6 +12,7 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import pers.solid.ecmd.util.pack.LazyReference;
 
 import java.util.Optional;
 
