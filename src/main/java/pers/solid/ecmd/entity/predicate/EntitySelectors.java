@@ -83,6 +83,9 @@ public final class EntitySelectors {
     if (accessor.getEntityUUID() != null) {
       entries.add(new UuidEntityPredicateEntry(accessor.getEntityUUID()));
     }
+    if (!entitySelector.includesEntities()) {
+      entries.add(PlayerOnlyEntityPredicate.INSTANCE);
+    }
 
     return entries.build();
   }
