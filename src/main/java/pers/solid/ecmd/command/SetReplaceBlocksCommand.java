@@ -20,12 +20,12 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.task.BlockPlacementTask;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
@@ -95,14 +95,14 @@ public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate replacingTarget) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, replacingTarget, false, false, new BlockFunctionContext(Block.UPDATE_CLIENTS, 0, source.getLevel().getRandom(), source, null), UnloadedPosBehavior.REJECT, true);
+    return setBlocksInRegion(region, blockFunction, source, replacingTarget, false, false, new ExecutionContext(source, null), Block.UPDATE_CLIENTS, 0, UnloadedPosBehavior.REJECT, true);
   }
 
   public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate replacingTarget, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getRequiredArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new ExecutionContext(source, kwArgs.getArg("seed")), getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getRequiredArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, ExecutionContext context, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
     if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
@@ -120,7 +120,9 @@ public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge
     final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.expressAsString());
 
     final BlockPlacementTask task = BlockPlacementTask.builder(taskName, Mth.createInsecureUUID(world.getRandom()), source)
-        .blockFunctionContext(context)
+        .executionContext(context)
+        .flags(flags)
+        .modFlags(modFlags)
         .blockFunction(blockFunction)
         .blockPredicate(predicate)
         .immediately(immediately)

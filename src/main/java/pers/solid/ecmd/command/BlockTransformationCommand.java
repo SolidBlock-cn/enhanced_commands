@@ -19,7 +19,6 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.history.BlockTransformationHistory;
@@ -80,8 +79,9 @@ public interface BlockTransformationCommand {
     final boolean immediately = keywordArgs.getBoolean("immediately") || region.numberOfBlocksAffected() <= 16384;
 
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region, iteratorTaskName, Mth.createInsecureUUID(world.getRandom()), source)
-        .setBlockPredicateContext(new ExecutionContext(world.getRandom(), source, seed))
-        .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), source, seed))
+        .setExecutionContext(new ExecutionContext(world.getRandom(), source, seed))
+        .setFlags(flags)
+        .setModFlags(modFlags)
         .transformsBlockPos(this::transformBlockPos)
         .transformsPos(this::transformPos)
         .transformsPosBack(this::transformPosBack)

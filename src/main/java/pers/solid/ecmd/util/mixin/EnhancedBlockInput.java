@@ -10,8 +10,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Set;
 
@@ -45,7 +45,7 @@ public class EnhancedBlockInput extends BlockInput {
       source = world.getServer().createCommandSourceStack();
     }
     try {
-      return blockFunction.setBlock(world, pos, new BlockFunctionContext(flags, 0, world.random, source, null));
+      return blockFunction.setBlock(world, pos, new ExecutionContext(world.random, source, null), flags, 0);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }

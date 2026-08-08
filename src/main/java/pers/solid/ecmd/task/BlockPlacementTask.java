@@ -13,11 +13,11 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.HistoryHolder;
 import pers.solid.ecmd.util.iterator.AbstractIteratorTask;
@@ -35,7 +35,8 @@ public class BlockPlacementTask extends AbstractIteratorTask {
   protected @Nullable
   final BlockPredicate predicate;
   private final boolean immediately;
-  private final BlockFunctionContext context;
+  private final ExecutionContext executionContext;
+  private final int flags, modFlags;
   private final UnloadedPosBehavior unloadedPosBehavior;
   /**
    * 影响的方块的数量。
@@ -50,16 +51,18 @@ public class BlockPlacementTask extends AbstractIteratorTask {
   protected Iterator<@Nullable Runnable> runnables;
   protected final @Nullable HistoryHolder historyHolder;
 
-  protected BlockPlacementTask(Component name, UUID uuid, CommandSourceStack source, ServerLevel world, Region region, BlockFunction blockFunction, @Nullable BlockPredicate predicate, boolean immediately, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) {
+  protected BlockPlacementTask(Component name, UUID uuid, CommandSourceStack source, ServerLevel world, Region region, BlockFunction blockFunction, @Nullable BlockPredicate predicate, boolean immediately, ExecutionContext executionContext, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) {
     super(name, uuid, source);
     this.world = world;
     this.blockFunction = blockFunction;
     this.predicate = predicate;
     this.immediately = immediately;
-    this.context = context;
+    this.executionContext = executionContext;
+    this.flags = flags;
+    this.modFlags = modFlags;
     this.unloadedPosBehavior = unloadedPosBehavior;
     this.posIterable = prepareActualPosIterable(region, unloadedPosBehavior);
-    this.history = undoable ? new BlockPlacementHistory(name, world, context.flags, context.modFlags) : null;
+    this.history = undoable ? new BlockPlacementHistory(name, world, flags, modFlags) : null;
     this.historyHolder = HistoryHolder.fromSource(source);
     this.runnables = getCombinedRunnables().iterator();
   }
@@ -120,7 +123,7 @@ public class BlockPlacementTask extends AbstractIteratorTask {
         }
         final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
         blockInWorld.getState();
-        if (predicate.test(blockInWorld, context)) {
+        if (predicate.test(blockInWorld, executionContext)) {
           oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
       });
@@ -131,7 +134,7 @@ public class BlockPlacementTask extends AbstractIteratorTask {
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     return Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
       try {
-        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), executionContext, entry.getValue(), history, flags, modFlags)) {
           numbersAffected++;
         }
       } catch (CommandSyntaxException e) {
@@ -184,8 +187,18 @@ public class BlockPlacementTask extends AbstractIteratorTask {
       return this;
     }
 
-    public Builder blockFunctionContext(@Nullable BlockFunctionContext context) {
-      this.context = context;
+    public Builder executionContext(@Nullable ExecutionContext context) {
+      this.executionContext = context;
+      return this;
+    }
+
+    public Builder flags(int flags) {
+      this.flags = flags;
+      return this;
+    }
+
+    public Builder modFlags(int modFlags) {
+      this.modFlags = modFlags;
       return this;
     }
 
@@ -219,7 +232,8 @@ public class BlockPlacementTask extends AbstractIteratorTask {
     private @Nullable BlockFunction blockFunction;
     private @Nullable BlockPredicate predicate;
     private boolean immediately;
-    private @Nullable BlockFunctionContext context;
+    private @Nullable ExecutionContext executionContext;
+    private int flags, modFlags;
     private @Nullable UnloadedPosBehavior unloadedPosBehavior;
     private boolean undoable;
 
@@ -233,9 +247,9 @@ public class BlockPlacementTask extends AbstractIteratorTask {
       Objects.requireNonNull(world, "world");
       Objects.requireNonNull(region, "region");
       Objects.requireNonNull(blockFunction, "blockFunction");
-      Objects.requireNonNull(context, "BlockFunctionContext");
+      Objects.requireNonNull(executionContext, "ExecutionContext");
       Objects.requireNonNull(unloadedPosBehavior, "unloadedPosBehavior");
-      return new BlockPlacementTask(name, uuid, source, world, region, blockFunction, predicate, immediately, context, unloadedPosBehavior, undoable);
+      return new BlockPlacementTask(name, uuid, source, world, region, blockFunction, predicate, immediately, executionContext, flags, modFlags, unloadedPosBehavior, undoable);
     }
   }
 }

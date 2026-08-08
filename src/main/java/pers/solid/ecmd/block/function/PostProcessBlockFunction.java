@@ -15,10 +15,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public record PostProcessBlockFunction(List<Direction> directions) implements Bl
    * @see Block#updateFromNeighbourShapes(BlockState, LevelAccessor, BlockPos)
    */
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException {
     BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
     for (Direction direction : directions) {

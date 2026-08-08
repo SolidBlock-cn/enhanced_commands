@@ -5,9 +5,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public record TestBlockFunctionBlockPredicate(BlockFunction blockFunction) imple
   public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     final BlockState modifiedState;
     try {
-      modifiedState = blockFunction.getModifiedState(blockInWorld.getState(), blockInWorld.getState(), executionContext.positionProvider.getWorld$ec(), blockInWorld.getPos(), null, new BlockFunctionContext(3, 0, executionContext.random, executionContext.positionProvider, executionContext.getSeed()));
+      modifiedState = blockFunction.getModifiedState(blockInWorld.getState(), blockInWorld.getState(), executionContext.positionProvider.getWorld$ec(), blockInWorld.getPos(), new MutableObject<>(), executionContext);
     } catch (CommandSyntaxException e) {
       return false;
     }

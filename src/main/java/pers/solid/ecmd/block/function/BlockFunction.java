@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.command.SetReplaceBlocksCommand;
@@ -33,6 +32,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -133,15 +133,14 @@ public interface BlockFunction extends ExpressionConvertible, RequiresValidation
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context) throws CommandSyntaxException {
-    return setBlock(world, pos, context, null, null);
+  default boolean setBlock(Level world, BlockPos pos, ExecutionContext context, int flags, int modFlags) throws CommandSyntaxException {
+    return setBlock(world, pos, context, null, null, flags, modFlags);
   }
 
-  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) throws CommandSyntaxException {
+  default boolean setBlock(Level world, BlockPos pos, ExecutionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history, int flags, int modFlags) throws CommandSyntaxException {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<@Nullable CompoundTag> blockEntityData = new MutableObject<>(null);
     BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
-    final int modFlags = context.modFlags;
     if ((modFlags & SetReplaceBlocksCommand.POST_PROCESS_FLAG) != 0) {
       newState = Block.updateFromNeighbourShapes(newState, world, pos);
     }
@@ -153,7 +152,7 @@ public interface BlockFunction extends ExpressionConvertible, RequiresValidation
     if (oldEntity != null && !oldEntity.isValidBlockState(newState)) {
       world.removeBlockEntity(pos);
     }
-    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, newState, context.flags, modFlags);
+    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, newState, flags, modFlags);
     final BlockEntity newEntity = world.getBlockEntity(pos);
     if (newEntity != null) {
       final CompoundTag modifiedData = blockEntityData.getValue();
@@ -176,7 +175,7 @@ public interface BlockFunction extends ExpressionConvertible, RequiresValidation
    * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
-  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException;
+  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException;
 
   BlockFunctionType<?> getType();
 

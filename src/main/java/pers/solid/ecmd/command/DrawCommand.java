@@ -26,13 +26,13 @@ import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.SphereRegion;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
@@ -70,14 +70,14 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
 
   private static int setBlocksWithDefaultKeywordArgs(Curve curve, BlockFunction blockFunction, CommandSourceStack source) throws CommandSyntaxException {
-    return execute(curve, blockFunction, source, null, false, false, 0d, new BlockFunctionContext(Block.UPDATE_CLIENTS, 0, source.getLevel().getRandom(), source, null), 0d, UnloadedPosBehavior.REJECT, true);
+    return execute(curve, blockFunction, source, null, false, false, 0d, new ExecutionContext(source, null), Block.UPDATE_CLIENTS, 0, 0d, UnloadedPosBehavior.REJECT, true);
   }
 
   private static int setBlocksFromKeywordArgs(Curve curve, BlockFunction blockFunction, CommandSourceStack source, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new BlockFunctionContext(SetReplaceBlocksCommand.getFlags(kwArgs), SetReplaceBlocksCommand.getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new ExecutionContext(source, kwArgs.getArg("seed")), SetReplaceBlocksCommand.getFlags(kwArgs), SetReplaceBlocksCommand.getModFlags(kwArgs), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  private static int execute(Curve curve, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, double interval, BlockFunctionContext context, double thickness, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  private static int execute(Curve curve, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, double interval, ExecutionContext context, int flags, int modFlags, double thickness, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     if (interval > -0.05 && interval < 0.05) interval = 0.05;
     final double estimatedIterationAmount = curve.length() / Math.min(interval, 1) * (thickness == 0 ? 1 : Math.max(1d, Mth.square(thickness) * Math.PI));
     if (!Double.isFinite(estimatedIterationAmount)) {
@@ -132,7 +132,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     }
 
     final MutableComponent taskName = Component.translatable("enhanced_commands.commands.draw.task_name", curve.expressAsString());
-    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
+    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
 
 
     // 第一部分：收集 oldStates
@@ -158,7 +158,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     final Iterable<Runnable> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
       try {
-        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history, flags, modFlags)) {
           numbersAffected.increment();
         }
       } catch (CommandSyntaxException e) {
