@@ -6,14 +6,14 @@
       "pattern": "oak"
     },
     {
-      "type": "negating",
+      "type": "not",
       "predicate": {
         "type": "id_contain",
         "pattern": "dark_oak"
       }
     },
     {
-      "type": "negating",
+      "type": "not",
       "predicate": {
         "type": "id_contain",
         "pattern": "pale_oak"

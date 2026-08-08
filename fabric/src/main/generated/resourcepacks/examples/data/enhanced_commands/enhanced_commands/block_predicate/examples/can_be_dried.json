@@ -1,7 +1,7 @@
 {
   "type": "test_block_function_result",
   "predicate": {
-    "type": "negating",
+    "type": "not",
     "predicate": {
       "type": "property_names",
       "properties": [
