@@ -1,6 +1,6 @@
-// 1.21.1	2026-08-08T21:07:13.0951739	enhanced_commands:examples/Region Provider (Example Pack)
-6c41785a12bf3bb0adeb49f714043b2bb20a5d08 resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\loop_ref\b.json
+// 1.21.1	2026-08-08T21:31:15.0459324	enhanced_commands:examples/Region Provider (Example Pack)
 f33e19e478cdc31fc1a65b1abebf44d7d6df452a resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\self_ref.json
+6c41785a12bf3bb0adeb49f714043b2bb20a5d08 resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\loop_ref\b.json
 c1149fe6b181681d2cd08ae9f70f2cc658b5ecc7 resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\loop_ref\a.json
 5ddf06f014354413f2a6c5cbb2ab3a12c7aa5a7c resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\original_sphere_hollow.json
 ed7b96b962dbc0a8294cd59543b4148f020608eb resourcepacks\examples\data\enhanced_commands\enhanced_commands\region_provider\examples\original_sphere.json

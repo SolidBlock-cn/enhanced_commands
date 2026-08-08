@@ -1,15 +1,18 @@
 {
   "type": "test_block_function_result",
   "predicate": {
-    "type": "property_names",
-    "properties": [
-      {
-        "type": "comparison",
-        "comparator": "=",
-        "property": "waterlogged",
-        "value": "false"
-      }
-    ]
+    "type": "negating",
+    "predicate": {
+      "type": "property_names",
+      "properties": [
+        {
+          "type": "comparison",
+          "comparator": "=",
+          "property": "waterlogged",
+          "value": "true"
+        }
+      ]
+    }
   },
   "try_apply": {
     "type": "dry"
