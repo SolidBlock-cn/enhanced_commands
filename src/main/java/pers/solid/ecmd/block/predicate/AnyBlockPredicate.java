@@ -30,16 +30,16 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(blockInWorld, executionContext));
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(blockInWorld, context));
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
     for (BlockPredicate blockPredicate : predicates) {
-      TestResult testResult = blockPredicate.testAndDescribe(blockInWorld, executionContext);
+      TestResult testResult = blockPredicate.testAndDescribe(blockInWorld, context);
       results.add(testResult);
       if (testResult.successes())
         successes++;

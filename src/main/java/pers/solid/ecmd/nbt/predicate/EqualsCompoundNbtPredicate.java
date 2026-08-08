@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map) implemen
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return false;
     if (nbtCompound.size() != map.size())
@@ -45,7 +46,7 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map) implemen
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
       final Tag actualElement = nbtCompound.get(key);
-      if (actualElement == null || !valuePredicate.test(actualElement)) {
+      if (actualElement == null || !valuePredicate.test(actualElement, context)) {
         return false;
       }
     }

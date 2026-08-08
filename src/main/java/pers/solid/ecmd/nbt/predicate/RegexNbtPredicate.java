@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Objects;
@@ -26,7 +27,7 @@ public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate, DoesNo
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof StringTag nbtString))
       return false;
     return pattern.matcher(nbtString.getAsString()).find();

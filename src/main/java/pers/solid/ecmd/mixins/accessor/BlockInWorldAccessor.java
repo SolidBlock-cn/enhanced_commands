@@ -9,4 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface BlockInWorldAccessor {
   @Accessor
   void setState(BlockState state);
+
+  @Accessor
+  void setCachedEntity(boolean cachedEntity);
 }

@@ -37,15 +37,15 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return blockPredicate.test(new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().above(offset), false), executionContext);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return blockPredicate.test(new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().above(offset), false), context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final MutableComponent description;
     final BlockInWorld offsetPosition = new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().above(offset), false);
-    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, executionContext);
+    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, context);
     final boolean successes = attachment.successes();
     final String string = successes ? "pass" : "fail";
     if (offset > 0) {

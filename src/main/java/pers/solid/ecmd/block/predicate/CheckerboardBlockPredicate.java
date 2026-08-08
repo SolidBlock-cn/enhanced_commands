@@ -32,17 +32,17 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockPredicate entry = getEntry(predicates, blockInWorld.getPos());
     if (entry == null) return false;
-    return entry.test(blockInWorld, executionContext);
+    return entry.test(blockInWorld, context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockPredicate entry = getEntry(predicates, blockInWorld.getPos());
     if (entry == null) return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.checkerboard.fail_no_checkerboard"));
-    final TestResult testResult = entry.testAndDescribe(blockInWorld, executionContext);
+    final TestResult testResult = entry.testAndDescribe(blockInWorld, context);
     final MutableComponent wrapVector = TextUtil.wrapVector(blockInWorld.getPos());
     return testResult.successes() ? TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.checkerboard.pass", wrapVector), Collections.singletonList(testResult)) : TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.checkerboard.fail", wrapVector), Collections.singletonList(testResult));
   }

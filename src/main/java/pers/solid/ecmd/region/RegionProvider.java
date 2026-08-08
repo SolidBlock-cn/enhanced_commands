@@ -8,8 +8,8 @@ import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.PositionProvider;
 
 /**
  * @see net.minecraft.commands.arguments.coordinates.Coordinates
@@ -33,7 +33,7 @@ public interface RegionProvider<R extends Region> extends ExpressionConvertible 
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
   }
 
-  R toAbsoluteRegion(PositionProvider positionProvider);
+  R toAbsoluteRegion(ExecutionContext context);
 
   RegionType<? super R> getType();
 }

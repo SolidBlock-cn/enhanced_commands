@@ -9,6 +9,7 @@ import net.minecraft.world.level.storage.loot.providers.number.BinomialDistribut
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.block.function.*;
 import pers.solid.ecmd.block.predicate.*;
 import pers.solid.ecmd.math.WeightedList;
@@ -23,12 +24,20 @@ import pers.solid.ecmd.nbt.predicate.RegexNbtPredicate;
 import pers.solid.ecmd.number.EnhancedCommandsNumberProvider;
 import pers.solid.ecmd.property.function.AllRandomPropertyNameFunction;
 import pers.solid.ecmd.property.function.SimplePropertyNameFunction;
+import pers.solid.ecmd.property.predicate.Comparator;
+import pers.solid.ecmd.property.predicate.ComparisonPropertyNamePredicate;
+import pers.solid.ecmd.region.OutlineRegionProvider;
+import pers.solid.ecmd.region.ReferenceRegionProvider;
+import pers.solid.ecmd.region.RegionProvider;
+import pers.solid.ecmd.region.SphereRegionProvider;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.enums.OutlineType;
 import pers.solid.ecmd.util.pack.RegistryHelper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
 public interface ExamplePackDataGenerations {
@@ -77,9 +86,18 @@ public interface ExamplePackDataGenerations {
           new NegatingBlockPredicate(new IdContainBlockPredicate(Pattern.compile("dark_oak"))),
           new NegatingBlockPredicate(new IdContainBlockPredicate(Pattern.compile("pale_oak")))
       )));
+      context.add(of("can_be_dried"), new BlockFunctionResultBlockPredicate(
+          new DryBlockFunction(),
+          new PropertiesNamesBlockPredicate(new ComparisonPropertyNamePredicate("waterlogged", Comparator.EQ, "false"))
+      ));
 
-      context.add(of("loop_ref/b"), new TestBlockFunctionBlockPredicate(
-          new ReferenceBlockFunction(RegistryHelper.safeStandAloneHolderReference(ForBlockFunction.of("loop_ref/a")))
+      context.add(of("correct_ref/a"), new ProbabilityBlockPredicate(0.4f, ConstantBlockPredicate.ALWAYS_TRUE, OptionalLong.empty()));
+      context.add(of("correct_ref_b"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/a"))));
+      context.add(of("correct_ref_c"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/b"))));
+
+      context.add(of("loop_ref/b"), new BlockFunctionResultBlockPredicate(
+          new ReferenceBlockFunction(RegistryHelper.safeStandAloneHolderReference(ForBlockFunction.of("loop_ref/a"))),
+          new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(of("correct_ref/c")))
       ));
     }
   }
@@ -132,6 +150,28 @@ public interface ExamplePackDataGenerations {
     public void configureBridge(ContextBridge<NumberProvider> context) {
       context.add(of("uniform_0_100"), UniformGenerator.between(0, 100));
       context.add(of("binomial_standard"), BinomialDistributionGenerator.binomial(0, 1));
+    }
+  }
+
+  class ForRegionProvider implements DynamicRegistryGenerationBridge<RegionProvider<?>> {
+    private static ResourceKey<RegionProvider<?>> of(String name) {
+      return ResourceKey.create(RegionProvider.REGISTRY_KEY, id(name));
+    }
+
+    @Override
+    public String getBridgeName() {
+      return "Region Provider (Example Pack)";
+    }
+
+    @Override
+    public void configureBridge(ContextBridge<RegionProvider<?>> context) {
+      context.add(of("original_sphere"), new SphereRegionProvider(16, EnhancedPosArgument.CURRENT_POS));
+      context.add(of("original_sphere_hollow"), new OutlineRegionProvider(OutlineType.OUTLINE, new SphereRegionProvider(16, EnhancedPosArgument.CURRENT_POS)));
+
+      context.add(of("self_ref"), new ReferenceRegionProvider(RegistryHelper.safeStandAloneHolderReference(of("self_ref"))));
+
+      context.add(of("loop_ref/a"), new ReferenceRegionProvider(RegistryHelper.safeStandAloneHolderReference(of("loop_ref/b"))));
+      context.add(of("loop_ref/b"), new ReferenceRegionProvider(RegistryHelper.safeStandAloneHolderReference(of("loop_ref/a"))));
     }
   }
 }

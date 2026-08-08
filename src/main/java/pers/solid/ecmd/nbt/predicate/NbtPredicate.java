@@ -11,13 +11,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.function.Predicate;
 
-public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag>, RequiresValidation {
+public interface NbtPredicate extends ExpressionConvertible, RequiresValidation {
   Codec<NbtPredicate> CODEC = NbtPredicateType.CODEC.dispatch(NbtPredicate::getType, NbtPredicateType::codec);
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
@@ -36,14 +37,15 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag>, Req
     return requirePrefix ? ": " + expressAsString() : expressAsString();
   }
 
-  @Override
-  boolean test(Tag nbtElement);
+  boolean test(Tag nbtElement, ExecutionContext context);
 
   NbtPredicateType<?> getType();
 
-  @Override
-  default NbtPredicate negate() {
-    return new NegatingNbtPredicate(this);
+  /**
+   * 由于此类的 {@link #test(Tag, ExecutionContext)} 方法需要一个 {@link ExecutionContext} 对象，可以使用此方法先提供一个 {@link ExecutionContext} 使其转化为常规的 {@link Predicate}。
+   */
+  default Predicate<Tag> asJavaPredicate(ExecutionContext context) {
+    return tag -> test(tag, context);
   }
 
   enum Type implements StringRepresentable {

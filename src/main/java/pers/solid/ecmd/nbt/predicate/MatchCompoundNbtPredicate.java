@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public record MatchCompoundNbtPredicate(List<Entry> entries) implements NbtPredi
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return false;
     for (Entry entry : entries) {
@@ -79,14 +80,14 @@ public record MatchCompoundNbtPredicate(List<Entry> entries) implements NbtPredi
       final NbtPredicate valuePredicate = entry.value();
       if (key != null) {
         final Tag actualElement = nbtCompound.get(key);
-        if (actualElement == null || !valuePredicate.test(actualElement)) {
+        if (actualElement == null || !valuePredicate.test(actualElement, context)) {
           return false;
         }
       } else {
         boolean valueFound = false;
         for (String keyInNbtCompound : nbtCompound.getAllKeys()) {
           final Tag element = nbtCompound.get(keyInNbtCompound);
-          if (element != null && valuePredicate.test(element)) {
+          if (element != null && valuePredicate.test(element, context)) {
             valueFound = true;
           }
         }

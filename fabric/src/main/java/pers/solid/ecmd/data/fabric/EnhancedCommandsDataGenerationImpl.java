@@ -33,6 +33,7 @@ public class EnhancedCommandsDataGenerationImpl implements DataGeneratorEntrypoi
     addDynamicRegistryGeneration(examplePack, new ExamplePackDataGenerations.ForNbtFunction());
     addDynamicRegistryGeneration(examplePack, new ExamplePackDataGenerations.ForNbtPredicate());
     addDynamicRegistryGeneration(examplePack, new ExamplePackDataGenerations.ForNumberProvider());
+    addDynamicRegistryGeneration(examplePack, new ExamplePackDataGenerations.ForRegionProvider());
 
     examplePack.addProvider((output, registriesFuture) -> PackMetadataGenerator.forFeaturePack(output, Component.translatable("enhanced_commands.pack.examples.description")));
   }

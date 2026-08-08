@@ -3,7 +3,7 @@ package pers.solid.ecmd.region;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
-import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 
 public record PreciseCuboidRegionProvider(EnhancedCoordinates from, EnhancedCoordinates to) implements CuboidRegionProvider<PreciseCuboidRegion> {
   public static final MapCodec<PreciseCuboidRegionProvider> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -12,8 +12,8 @@ public record PreciseCuboidRegionProvider(EnhancedCoordinates from, EnhancedCoor
   ).apply(i, PreciseCuboidRegionProvider::new));
 
   @Override
-  public PreciseCuboidRegion toAbsoluteRegion(PositionProvider positionProvider) {
-    return new PreciseCuboidRegion(from.toAbsolutePos(positionProvider), to.toAbsolutePos(positionProvider));
+  public PreciseCuboidRegion toAbsoluteRegion(ExecutionContext context) {
+    return new PreciseCuboidRegion(from.toAbsolutePos(context.positionProvider), to.toAbsolutePos(context.positionProvider));
   }
 
   @Override

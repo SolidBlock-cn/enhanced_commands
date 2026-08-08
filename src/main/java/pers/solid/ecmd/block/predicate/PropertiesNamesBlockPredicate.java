@@ -31,13 +31,21 @@ import java.util.stream.Collectors;
 public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicates) implements BlockPredicate, DoesNotRequireValidation {
   public static final MapCodec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
+  public PropertiesNamesBlockPredicate(PropertyNamePredicate predicates) {
+    this(List.of(predicates));
+  }
+
+  public PropertiesNamesBlockPredicate(PropertyNamePredicate... predicates) {
+    this(List.of(predicates));
+  }
+
   @Override
   public String expressAsString() {
     return predicates.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(",", "[", "]"));
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockState blockState = blockInWorld.getState();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       if (!propertyNamePredicate.test(blockState))
@@ -47,7 +55,7 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockState blockState = blockInWorld.getState();
     boolean successes = true;
     List<TestResult> attachments = new ArrayList<>();
@@ -69,7 +77,7 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   }
 
   @Override
-  public BlockPredicateType<ProbabilityBlockPredicate> getType() {
+  public BlockPredicateType<PropertiesNamesBlockPredicate> getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 

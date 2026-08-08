@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -26,7 +27,7 @@ public record EqualsListNbtPredicate(List<NbtPredicate> values) implements NbtPr
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof final ListTag nbtList))
       return false;
     if (nbtList.size() != values.size())
@@ -34,7 +35,7 @@ public record EqualsListNbtPredicate(List<NbtPredicate> values) implements NbtPr
     final ListIterator<NbtPredicate> listIterator = values.listIterator();
     while (listIterator.hasNext()) {
       final int nextIndex = listIterator.nextIndex();
-      if (!listIterator.next().test(nbtList.get(nextIndex))) {
+      if (!listIterator.next().test(nbtList.get(nextIndex), context)) {
         return false;
       }
     }

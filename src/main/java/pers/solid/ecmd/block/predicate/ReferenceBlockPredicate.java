@@ -15,13 +15,13 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> reference
   public static final PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> PREFIXED_ID_PARSER = new PrefixedIdParser<>('$', Component.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return value().test(blockInWorld, executionContext);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return value().test(blockInWorld, context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final TestResult testResult = value().testAndDescribe(blockInWorld, executionContext);
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final TestResult testResult = value().testAndDescribe(blockInWorld, context);
     final MutableComponent posText = TextUtil.wrapVector(blockInWorld.getPos());
     final MutableComponent idText = TextUtil.literal(identifier()).withStyle(Styles.EXPECTED);
     if (testResult.successes()) {

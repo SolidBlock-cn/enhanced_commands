@@ -8,6 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.function.PositionalListEntry;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,14 +50,14 @@ public record MatchListNbtPredicate(List<NbtPredicate> values, List<PositionalLi
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof ListTag nbtList)) {
       return false;
     }
     for (NbtPredicate nbtPredicate : values) {
       boolean elementMatched = false;
       for (Tag actualElement : nbtList) {
-        if (nbtPredicate.test(actualElement)) {
+        if (nbtPredicate.test(actualElement, context)) {
           elementMatched = true;
           break;
         }
@@ -71,7 +72,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> values, List<PositionalLi
         expectedIndex += nbtList.size();
       }
       if (expectedIndex >= 0 && size > expectedIndex) {
-        if (!pair.value().test(nbtList.get(expectedIndex))) {
+        if (!pair.value().test(nbtList.get(expectedIndex), context)) {
           return false;
         }
       } else {

@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.extension.ServerPlayerExtension;
 
 public enum ActiveRegionProvider implements RegionProvider<Region> {
@@ -14,9 +14,9 @@ public enum ActiveRegionProvider implements RegionProvider<Region> {
   public static final MapCodec<ActiveRegionProvider> CODEC = MapCodec.unit(INSTANCE);
 
   @Override
-  public Region toAbsoluteRegion(PositionProvider positionProvider) {
+  public Region toAbsoluteRegion(ExecutionContext context) {
     try {
-      final Player playerEntity = positionProvider.getPlayerOrThrow$ec();
+      final Player playerEntity = context.positionProvider.getPlayerOrThrow$ec();
       if (playerEntity instanceof ServerPlayerExtension serverPlayerEntityExtension) {
         return serverPlayerEntityExtension.getActiveRegionOrThrow$ec().region();
       } else {

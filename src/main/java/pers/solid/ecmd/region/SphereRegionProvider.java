@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
-import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.StringUtil;
 
 public record SphereRegionProvider(double radius, EnhancedCoordinates center) implements RegionProvider<SphereRegion> {
@@ -14,8 +14,8 @@ public record SphereRegionProvider(double radius, EnhancedCoordinates center) im
   ).apply(i, SphereRegionProvider::new));
 
   @Override
-  public SphereRegion toAbsoluteRegion(PositionProvider positionProvider) {
-    return new SphereRegion(radius, center.toAbsolutePos(positionProvider));
+  public SphereRegion toAbsoluteRegion(ExecutionContext context) {
+    return new SphereRegion(radius, center.toAbsolutePos(context.positionProvider));
   }
 
   @Override

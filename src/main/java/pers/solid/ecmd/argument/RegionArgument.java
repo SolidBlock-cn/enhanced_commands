@@ -12,6 +12,7 @@ import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,10 +37,10 @@ public record RegionArgument(CommandBuildContext commandBuildContext) implements
       if (!(CommandContextHelper.getArgumentsOf(context).containsKey(name))) {
         final RegionProvider<?> sourceArg = context.getSource().getExtraArgument$ec("region", RegionProvider.class);
         if (sourceArg != null) {
-          return sourceArg.toAbsoluteRegion(context.getSource());
+          return sourceArg.toAbsoluteRegion(new ExecutionContext(context.getSource()));
         }
       }
-      return context.getArgument(name, RegionProvider.class).toAbsoluteRegion(context.getSource());
+      return context.getArgument(name, RegionProvider.class).toAbsoluteRegion(new ExecutionContext(context.getSource()));
     } catch (RuntimeException e) {
       if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
         throw commandSyntaxException;

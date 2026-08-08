@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.util.DefaultNamespace;
-import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public record ReferenceRegionProvider(Holder.Reference<RegionProvider<?>> reference) implements RegionProvider<Region>, ReferenceEntry<RegionProvider<?>> {
@@ -12,8 +12,8 @@ public record ReferenceRegionProvider(Holder.Reference<RegionProvider<?>> refere
   public static final PrefixedIdParser<ReferenceRegionProvider, RegionProvider<?>> PREFIXED_ID_PARSER = new PrefixedIdParser<>('$', Component.translatable("enhanced_commands.region.reference"), REGISTRY_KEY, ReferenceRegionProvider::new);
 
   @Override
-  public Region toAbsoluteRegion(PositionProvider positionProvider) {
-    return value().toAbsoluteRegion(positionProvider);
+  public Region toAbsoluteRegion(ExecutionContext context) {
+    return value().toAbsoluteRegion(context);
   }
 
   @Override

@@ -24,12 +24,12 @@ public record RegionEntityPredicateEntry(RegionProvider<?> region) implements En
 
   @Override
   public boolean test(Entity entity, ExecutionContext context) {
-    return Region.getCached(region, context.positionProvider).contains(entity.position());
+    return Region.getCached(region, context).contains(entity.position());
   }
 
   @Override
   public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
-    final Region cached = Region.getCached(region, context.positionProvider);
+    final Region cached = Region.getCached(region, context);
     if (cached.contains(entity.position())) {
       return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.region.true", displayName, cached.expressAsString()));
     } else {

@@ -23,16 +23,16 @@ public record RelBlockPredicate(Vec3iProvider relPos, BlockPredicate predicate) 
   public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iProvider.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final BlockPos pos = blockInWorld.getPos().offset(relPos.toActualVector(executionContext.positionProvider));
-    return predicate.test(new BlockInWorld(blockInWorld.getLevel(), pos, false), executionContext);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    final BlockPos pos = blockInWorld.getPos().offset(relPos.toActualVector(context.positionProvider));
+    return predicate.test(new BlockInWorld(blockInWorld.getLevel(), pos, false), context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final Vec3i vector = relPos.toActualVector(executionContext.positionProvider);
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final Vec3i vector = relPos.toActualVector(context.positionProvider);
     final BlockPos pos = blockInWorld.getPos().offset(vector);
-    final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(blockInWorld.getLevel(), pos, false), executionContext);
+    final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(blockInWorld.getLevel(), pos, false), context);
     return TestResult.of(testResult.successes(), Component.translatable("enhanced_commands.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(vector)), List.of(testResult));
   }
 

@@ -49,7 +49,7 @@ public record TagBlockPredicate(HolderSet.Named<Block> tag, @UnmodifiableView Li
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockState blockState = blockInWorld.getState();
     final boolean inTag = blockState.is(tag);
     if (!inTag) {
@@ -63,7 +63,7 @@ public record TagBlockPredicate(HolderSet.Named<Block> tag, @UnmodifiableView Li
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockState blockState = blockInWorld.getState();
     final boolean inTag = blockState.is(tag);
     boolean successes = true;

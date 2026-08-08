@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
@@ -32,7 +33,7 @@ public record MatchPrimitiveNbtPredicate(Tag value) implements NbtPredicate, Doe
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     return NbtUtils.compareNbt(nbtElement, value, true);
   }
 

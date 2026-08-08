@@ -35,11 +35,11 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   public static final MapCodec<LootConditionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(LootItemCondition.CODEC.fieldOf("condition").forGetter(LootConditionBlockPredicate::entry)).apply(i, LootConditionBlockPredicate::new));
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     final LootItemCondition lootCondition = entry.value();
     final LevelReader world = blockInWorld.getLevel();
     if (!(world instanceof final ServerLevel serverWorld)) return false;
-    return lootCondition.test(LootBridge.createContextForBlock(blockInWorld, serverWorld, executionContext.getSeed(this)));
+    return lootCondition.test(LootBridge.createContextForBlock(blockInWorld, serverWorld, context.getSeed(this)));
   }
 
   @Override
