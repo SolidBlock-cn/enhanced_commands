@@ -50,7 +50,7 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final WeightedListParser<ItemFunction> weightedListParser = WeightedListParser.of((parseContext1) -> ItemFunctionParser.parse(parseContext));
+      final WeightedListParser<ItemFunction> weightedListParser = WeightedListParser.of((parseContext1) -> ItemFunction.parse(parseContext));
       weightedList = weightedListParser.parse(parseContext);
     }
   }

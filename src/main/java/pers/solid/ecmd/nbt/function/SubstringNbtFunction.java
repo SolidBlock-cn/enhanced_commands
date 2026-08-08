@@ -137,7 +137,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
           parseContext.setSuggestion((context, builder) -> ParsingUtil.suggestBoolean(builder));
           lenient = parseContext.reader().readBoolean();
         }
-        case "original" -> original = NbtFunction.parse(parseContext, false, false);
+        case "original" -> original = NbtFunction.parse(parseContext);
       }
     }
 

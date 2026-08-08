@@ -1,19 +1,13 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.ExtraCodecs;
-import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionContentParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate, DoesNotRequireValidation {
@@ -50,20 +44,5 @@ public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate, DoesNo
   @Override
   public NbtPredicateType<RegexNbtPredicate> getType() {
     return NbtPredicateTypes.REGEX;
-  }
-
-  public static class Parser implements FunctionContentParser<RegexNbtPredicate> {
-    private @Nullable Pattern pattern;
-
-    @Override
-    public RegexNbtPredicate getParseResult(ParseContext<?> parseContext) {
-      Objects.requireNonNull(pattern, "pattern");
-      return new RegexNbtPredicate(pattern);
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      pattern = ParsingUtil.readRegex(parseContext.reader());
-    }
   }
 }

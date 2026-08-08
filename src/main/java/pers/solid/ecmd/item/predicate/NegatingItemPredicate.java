@@ -15,7 +15,7 @@ public record NegatingItemPredicate(ItemPredicate predicate) implements Predicat
 
   @Override
   public ItemPredicateType<NegatingItemPredicate> getType() {
-    return ItemPredicateTypes.NEGATING;
+    return ItemPredicateTypes.NOT;
   }
 
   @Override

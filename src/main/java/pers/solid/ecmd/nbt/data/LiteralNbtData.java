@@ -15,7 +15,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.function.NbtFunction;
-import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -28,7 +27,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
 
   public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-    final NbtFunction nbtFunction = NbtFunctionParser.parseNbtFunction(parseContext, false, false);
+    final NbtFunction nbtFunction = NbtFunction.parse(parseContext);
     return new LiteralNbtData(nbtFunction);
   }
 

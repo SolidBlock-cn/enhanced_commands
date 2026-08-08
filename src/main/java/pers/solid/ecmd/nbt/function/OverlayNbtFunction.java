@@ -63,7 +63,7 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      nbtFunctions.add(NbtFunction.parse(parseContext, false, false));
+      nbtFunctions.add(NbtFunction.parse(parseContext));
     }
   }
 }

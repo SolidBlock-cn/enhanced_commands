@@ -50,8 +50,8 @@ public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) i
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtPredicate = NbtPredicate.parse(parseContext, false, false);
-        case 1 -> nbtFunction = NbtFunction.parse(parseContext, false, false);
+        case 0 -> nbtPredicate = NbtPredicate.parse(parseContext);
+        case 1 -> nbtFunction = NbtFunction.parse(parseContext);
       }
     }
 

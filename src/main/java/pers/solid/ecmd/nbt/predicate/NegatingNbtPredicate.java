@@ -23,7 +23,7 @@ public record NegatingNbtPredicate(NbtPredicate value) implements NbtPredicate {
 
   @Override
   public NbtPredicateType<NegatingNbtPredicate> getType() {
-    return NbtPredicateTypes.NEGATING;
+    return NbtPredicateTypes.NOT;
   }
 
   @Override

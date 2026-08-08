@@ -2,19 +2,15 @@ package pers.solid.ecmd.block.predicate;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionContentParser;
-import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public record AnyBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
@@ -60,22 +56,5 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   @Override
   public Iterable<? extends @Nullable Object> membersToValidate() {
     return predicates;
-  }
-
-  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionContentParser.SequentialParams<AnyBlockPredicate> {
-    public Parser() {
-      this(new ArrayList<>());
-    }
-
-    @Override
-    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicate.parse(parseContext);
-      blockPredicates.add(parse);
-    }
-
-    @Override
-    public AnyBlockPredicate getParseResult(ParseContext<?> parseContext) {
-      return new AnyBlockPredicate(blockPredicates);
-    }
   }
 }
