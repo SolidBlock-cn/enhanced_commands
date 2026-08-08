@@ -10,8 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.util.DefaultNamespace;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) implements BlockFunction, ReferenceEntry<BlockFunction> {
@@ -19,7 +19,7 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> reference) 
   public static final PrefixedIdParser<ReferenceBlockFunction, BlockFunction> PREFIXED_ID_PARSER = new PrefixedIdParser<>('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException {
     return value().getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 

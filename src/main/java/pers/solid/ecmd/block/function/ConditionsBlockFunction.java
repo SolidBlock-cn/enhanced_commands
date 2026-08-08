@@ -12,11 +12,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public record ConditionsBlockFunction(List<ConditionalBlockFunction> conditions)
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException {
     final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
     for (ConditionalBlockFunction function : conditions) {
       if (function.condition().test(blockInWorld, context)) {

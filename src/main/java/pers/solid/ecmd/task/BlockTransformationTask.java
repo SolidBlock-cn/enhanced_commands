@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.block.function.BlockFunction;
-import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.function.SimpleBlockFunction;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.command.SetReplaceBlocksCommand;
@@ -86,7 +85,8 @@ public class BlockTransformationTask extends AbstractIteratorTask {
    */
   private final Region region;
   private final ExecutionContext executionContext;
-  private final BlockFunctionContext blockFunctionContext;
+  private final int flags;
+  private final int modFlags;
   /**
    * 如果不为 {@code null}，那么只有符合此谓词的方块才会受到影响，包括替换新位置的方块以及按照规则替换原位置的方块。
    */
@@ -131,7 +131,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
   /**
    * @see Builder#build
    */
-  private BlockTransformationTask(Component name, UUID uuid, CommandSourceStack source, boolean immediately, boolean shouldTransformRegion, Consumer<BlockTransformationTask> completionNotifier, Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3, Vec3> posTransformer, @Nullable Function<Vec3, Vec3> invertedPosTransformer, Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, Level world, Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
+  private BlockTransformationTask(Component name, UUID uuid, CommandSourceStack source, boolean immediately, boolean shouldTransformRegion, Consumer<BlockTransformationTask> completionNotifier, Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3, Vec3> posTransformer, @Nullable Function<Vec3, Vec3> invertedPosTransformer, Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, Level world, Region region, ExecutionContext executionContext, int flags, int modFlags, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
     super(name, uuid, source);
     this.shouldTransformRegion = shouldTransformRegion;
     this.completionNotifier = completionNotifier;
@@ -144,7 +144,8 @@ public class BlockTransformationTask extends AbstractIteratorTask {
     this.world = world;
     this.region = region;
     this.executionContext = executionContext;
-    this.blockFunctionContext = blockFunctionContext;
+    this.flags = flags;
+    this.modFlags = modFlags;
     this.affectsOnly = affectsOnly;
     this.transformsOnly = transformsOnly;
     this.remaining = remaining;
@@ -335,7 +336,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
           if (history != null) {
             history.recordBlockAndEntity(world, transformedBlockPos, transformedState);
           }
-          boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedBlockPos, transformedState, blockFunctionContext.flags, blockFunctionContext.modFlags);
+          boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedBlockPos, transformedState, flags, modFlags);
           final CompoundTag nbtCompound = nbts.get(transformedBlockPos.asLong());
           final @Nullable BlockEntity transformedBlockEntity;
           if ((transformedBlockEntity = world.getBlockEntity(transformedBlockPos)) != null) {
@@ -361,7 +362,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
         });
         setRemaining = () -> affectedRemaining.longStream().mapToObj(blockPos -> (Runnable) () -> {
           try {
-            if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
+            if (remaining.setBlock(world, mutable.set(blockPos), executionContext, null, history, flags, modFlags)) {
               affectedBlocks++;
             }
           } catch (CommandSyntaxException e) {
@@ -372,7 +373,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
         collectMatchingRemaining = Collections.emptyList();
         setRemaining = Iterables.transform(remainingPosIterable, blockPos -> () -> {
           try {
-            if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
+            if (blockPos != null && remaining.setBlock(world, blockPos, executionContext, null, history, flags, modFlags)) {
               affectedBlocks++;
             }
           } catch (CommandSyntaxException e) {
@@ -435,7 +436,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
                   if (history != null && !history.oldStates.containsKey(transformedPos.asLong())) {
                     history.recordBlockAndEntity(world, transformedPos, state);
                   }
-                  boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedPos, state, blockFunctionContext.flags, blockFunctionContext.modFlags);
+                  boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedPos, state, flags, modFlags);
                   final @Nullable CompoundTag nbtCompound = nbts.get(transformedPos.asLong());
                   final @Nullable BlockEntity transformedBlockEntity;
                   if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedPos)) != null) {
@@ -592,7 +593,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
     private @Nullable Consumer<Entity> entityTransformer;
     private @Nullable Consumer<Entity> reverseEntityTransformer;
     private @Nullable ExecutionContext executionContext;
-    private @Nullable BlockFunctionContext blockFunctionContext;
+    private int flags, modFlags;
     private @Nullable BlockPredicate affectsOnly = null;
     private @Nullable BlockPredicate transformsOnly = null;
     private @Nullable BlockFunction remaining = DEFAULT_REMAINING_FUNCTION;
@@ -651,13 +652,18 @@ public class BlockTransformationTask extends AbstractIteratorTask {
       return this;
     }
 
-    public Builder setBlockPredicateContext(ExecutionContext executionContext) {
+    public Builder setExecutionContext(ExecutionContext executionContext) {
       this.executionContext = executionContext;
       return this;
     }
 
-    public Builder setBlockFunctionContext(BlockFunctionContext blockFunctionContext) {
-      this.blockFunctionContext = blockFunctionContext;
+    public Builder setFlags(int flags) {
+      this.flags = flags;
+      return this;
+    }
+
+    public Builder setModFlags(int modFlags) {
+      this.modFlags = modFlags;
       return this;
     }
 
@@ -716,9 +722,8 @@ public class BlockTransformationTask extends AbstractIteratorTask {
       Objects.requireNonNull(blockPosTransformer, "blockPosTransformer");
       Objects.requireNonNull(blockStateTransformer, "blockStateTransformer");
       Objects.requireNonNull(executionContext, "executionContext");
-      Objects.requireNonNull(blockFunctionContext, "blockFunctionContext");
       Objects.requireNonNull(completionNotifier, "completionNotifier");
-      return new BlockTransformationTask(name, uuid, source, immediately, shouldTransformRegion, completionNotifier, blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
+      return new BlockTransformationTask(name, uuid, source, immediately, shouldTransformRegion, completionNotifier, blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, flags, modFlags, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
     }
   }
 }

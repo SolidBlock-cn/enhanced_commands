@@ -13,7 +13,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.nbt.function.NbtFunction;
@@ -21,6 +20,7 @@ import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException {
     try {
       final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof CompoundTag nbtCompound) {

@@ -11,12 +11,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<@Nullable CompoundTag> blockEntityData, ExecutionContext context) throws CommandSyntaxException {
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyNameFunction propertyNameFunction : functions) {
       blockState = propertyNameFunction.getModifiedState(originalState, blockState, random);
