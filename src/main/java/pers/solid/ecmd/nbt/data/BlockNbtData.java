@@ -55,7 +55,7 @@ public record BlockNbtData(RegionProvider<?> region, BlockPredicate blockPredica
 
   @Override
   public Collection<BlockEntity> values(CommandSourceStack source) {
-    final Region region = this.region.toAbsoluteRegion(source);
+    final Region region = this.region.toAbsoluteRegion(new ExecutionContext(source));
     final ServerLevel world = source.getLevel();
     final ImmutableList<BlockEntity> blockEntities;
     final BoundingBox blockBox = region.minContainingBlockBox();

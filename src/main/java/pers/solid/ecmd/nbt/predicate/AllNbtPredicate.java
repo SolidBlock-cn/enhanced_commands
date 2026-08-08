@@ -7,6 +7,7 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,8 @@ public record AllNbtPredicate(List<NbtPredicate> predicates) implements NbtPredi
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
-    return predicates.stream().allMatch(p -> p.test(nbtElement));
+  public boolean test(Tag nbtElement, ExecutionContext context) {
+    return predicates.stream().allMatch(p -> p.test(nbtElement, context));
   }
 
   @Override

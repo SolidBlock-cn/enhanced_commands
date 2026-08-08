@@ -28,13 +28,13 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return !predicate.test(blockInWorld, executionContext);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return !predicate.test(blockInWorld, context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final TestResult testResult = predicate.testAndDescribe(blockInWorld, executionContext);
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final TestResult testResult = predicate.testAndDescribe(blockInWorld, context);
     if (testResult.successes()) {
       return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
     } else {
@@ -75,6 +75,9 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
       }
       final BlockPredicate parse = BlockPredicate.parse(parseContext);
       if (negates) {
+        if (parse == ConstantBlockPredicate.ALWAYS_TRUE) {
+          return ConstantBlockPredicate.ALWAYS_FALSE;
+        }
         return new NegatingBlockPredicate(parse);
       } else {
         return parse;

@@ -7,6 +7,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.property.predicate.Comparator;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -37,7 +38,7 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag value) implement
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (nbtElement instanceof NumericTag actualNumber && value instanceof NumericTag expectedNumber) {
       final byte actualType = actualNumber.getId();
       final byte expectedType = expectedNumber.getId();

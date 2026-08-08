@@ -49,18 +49,18 @@ public record ProbabilityBlockPredicate(float probability, BlockPredicate predic
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final RandomSource random = executionContext.getSplitterForOptionalSeed(this, seed).at(blockInWorld.getPos());
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(blockInWorld.getPos());
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return random.nextFloat() < probability;
     } else {
-      return random.nextFloat() < probability && predicate.test(blockInWorld, executionContext);
+      return random.nextFloat() < probability && predicate.test(blockInWorld, context);
     }
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final float nextFloat = executionContext.getSplitterForOptionalSeed(this, seed).at(blockInWorld.getPos()).nextFloat();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final float nextFloat = context.getSplitterForOptionalSeed(this, seed).at(blockInWorld.getPos()).nextFloat();
     final MutableComponent o1 = Component.literal(String.valueOf(nextFloat)).withStyle(Styles.ACTUAL);
     final MutableComponent o2 = Component.literal(String.valueOf(probability)).withStyle(Styles.EXPECTED);
     if (nextFloat < probability) {

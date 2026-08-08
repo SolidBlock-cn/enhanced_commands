@@ -58,19 +58,19 @@ public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nulla
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return base.test(blockInWorld, executionContext) && (properties == null || properties.test(blockInWorld, executionContext)) && (nbt == null || nbt.test(blockInWorld, executionContext));
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return base.test(blockInWorld, context) && (properties == null || properties.test(blockInWorld, context)) && (nbt == null || nbt.test(blockInWorld, context));
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final List<TestResult> attachments = new ArrayList<>(3);
-    attachments.add(base.testAndDescribe(blockInWorld, executionContext));
+    attachments.add(base.testAndDescribe(blockInWorld, context));
     if (properties != null) {
-      attachments.add(properties.testAndDescribe(blockInWorld, executionContext));
+      attachments.add(properties.testAndDescribe(blockInWorld, context));
     }
     if (nbt != null) {
-      attachments.add(nbt.testAndDescribe(blockInWorld, executionContext));
+      attachments.add(nbt.testAndDescribe(blockInWorld, context));
     }
 
     if (attachments.size() == 1) {

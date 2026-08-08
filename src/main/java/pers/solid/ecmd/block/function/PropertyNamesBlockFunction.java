@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) implements BlockFunction, DoesNotRequireValidation {
   public static final MapCodec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
+  public PropertyNamesBlockFunction(PropertyNameFunction functions) {
+    this(List.of(functions));
+  }
+
   public PropertyNamesBlockFunction(PropertyNameFunction... functions) {
     this(List.of(functions));
   }

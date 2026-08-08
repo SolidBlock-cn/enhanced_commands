@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -24,7 +25,7 @@ public record RangeNbtPredicate(BridgeRange<?> value) implements NbtPredicate, D
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     if (!(nbtElement instanceof final NumericTag nbtNumber))
       return false;
     if (value instanceof BridgeDoubleRange doubleRange) {

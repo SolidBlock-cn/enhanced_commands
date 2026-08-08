@@ -125,7 +125,7 @@ public interface NbtFunction extends ExpressionConvertible {
   }
 
   default Tag recursivelyApply(Tag nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
-    return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate);
+    return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate.asJavaPredicate(context));
   }
 
 }

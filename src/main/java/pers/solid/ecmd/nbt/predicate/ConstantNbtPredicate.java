@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 public enum ConstantNbtPredicate implements NbtPredicate, DoesNotRequireValidation {
@@ -30,13 +31,8 @@ public enum ConstantNbtPredicate implements NbtPredicate, DoesNotRequireValidati
   }
 
   @Override
-  public boolean test(Tag nbtElement) {
+  public boolean test(Tag nbtElement, ExecutionContext context) {
     return value;
-  }
-
-  @Override
-  public NbtPredicate negate() {
-    return of(!value);
   }
 
   @Override

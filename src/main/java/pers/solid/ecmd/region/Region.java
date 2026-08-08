@@ -19,9 +19,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.PositionProvider;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -35,8 +35,8 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   ResourceKey<Registry<Region>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region"));
   Codec<Region> CODEC = RegionType.CODEC.dispatch(Region::getType, RegionType::codec);
 
-  static Region getCached(RegionProvider<?> regionProvider, PositionProvider positionProvider) {
-    return CacheStorage.cache.getUnchecked(regionProvider).getUnchecked(positionProvider);
+  static Region getCached(RegionProvider<?> regionProvider, ExecutionContext context) {
+    return CacheStorage.cache.getUnchecked(regionProvider).getUnchecked(context);
   }
 
   /**
@@ -162,6 +162,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   }
 
   class CacheStorage {
-    private static final LoadingCache<RegionProvider<?>, LoadingCache<PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
+    private static final LoadingCache<RegionProvider<?>, LoadingCache<ExecutionContext, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
   }
 }

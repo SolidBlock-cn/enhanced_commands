@@ -131,7 +131,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Component.literal(reparsedPredicate.asString(false)).withStyle(Styles.RESULT)), false);
               final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Component.literal(reparsedFunction.expressAsString()).withStyle(Styles.RESULT)), false);
-              final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
+              final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement, new ExecutionContext(source));
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null, new ExecutionContext(source)).equals(nbtElement);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
@@ -191,7 +191,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
               final ItemStack mainHandItem = livingEntity.getMainHandItem();
               final ItemStack stack = itemFunction.getModifiedStack(mainHandItem, mainHandItem, new ExecutionContext(source));
               livingEntity.setItemInHand(InteractionHand.MAIN_HAND, stack);
-              context.getSource().sendFeedback$ecBridge(stack::getDisplayName, true);
+              source.sendFeedback$ecBridge(stack::getDisplayName, true);
               return 1;
             }))
     );
@@ -204,7 +204,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
                 .executes(context -> {
                   final Tag nbtToTest = getNbtTag(context, "nbt_to_test");
                   final NbtPredicate nbtPredicate = getNbtPredicate(context, "nbt_predicate");
-                  final boolean test = nbtPredicate.test(nbtToTest);
+                  final boolean test = nbtPredicate.test(nbtToTest, new ExecutionContext(context.getSource()));
                   context.getSource().sendFeedback$ecBridge(() -> Component.literal(Boolean.toString(test)), false);
                   return BooleanUtils.toInteger(test);
                 })))
@@ -236,12 +236,13 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addPosProperties(T argumentBuilder) {
     final Command<CommandSourceStack> execution = context -> {
       final Coordinates pos = context.getArgument("pos", Coordinates.class);
-      final Vec3 absolutePos = pos.getPosition(context.getSource());
-      context.getSource().sendFeedback$ecBridge(() -> Component.literal(EnhancedCoordinates.asString(pos)), false);
+      final CommandSourceStack source = context.getSource();
+      final Vec3 absolutePos = pos.getPosition(source);
+      source.sendFeedback$ecBridge(() -> Component.literal(EnhancedCoordinates.asString(pos)), false);
       if (pos instanceof final EnhancedCoordinates enhanced) {
-        context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(EnhancedCoordinates.CODEC.encodeStart(NbtOps.INSTANCE, enhanced).getOrThrow()), false);
+        source.sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(EnhancedCoordinates.CODEC.encodeStart(NbtOps.INSTANCE, enhanced).getOrThrow()), false);
       }
-      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.pos.result").append(CommonComponents.NEW_LINE).append(Component.literal(String.format(" x = %s\n y = %s\n z = %s", StringUtil.nf.format(absolutePos.x), StringUtil.nf.format(absolutePos.y), StringUtil.nf.format(absolutePos.z))).withStyle(ChatFormatting.GRAY)), false);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.pos.result").append(CommonComponents.NEW_LINE).append(Component.literal(String.format(" x = %s\n y = %s\n z = %s", StringUtil.nf.format(absolutePos.x), StringUtil.nf.format(absolutePos.y), StringUtil.nf.format(absolutePos.z))).withStyle(ChatFormatting.GRAY)), false);
       return 1;
     };
     for (final EnhancedPosArgument.NumberType numberType : EnhancedPosArgument.NumberType.values()) {
@@ -361,15 +362,16 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static <A, T> int executeCodecTest(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     ops = ((HolderLookup.Provider) context.getSource().getServer().reloadableRegistries().lookup()).createSerializationContext(ops);
     final T code = executeCodecShowInternal(context, fetchedArg, codec, ops);
     try {
       final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof Tag nbt) {
-        context.getSource().sendFeedback$ecBridge(() -> prettyPrintedClickableNbt(nbt), false);
+        source.sendFeedback$ecBridge(() -> prettyPrintedClickableNbt(nbt), false);
       }
       final boolean b = second.equals(fetchedArg);
-      context.getSource().sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
+      source.sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
       return BooleanUtils.toInteger(b);
     } catch (Throwable e) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
@@ -480,7 +482,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             commandBuildContext,
             "region",
             RegionArgument.region(commandBuildContext),
-            (parseContext, commandContext) -> RegionProvider.parse(parseContext).toAbsoluteRegion(commandContext.getSource()),
+            (parseContext, commandContext) -> RegionProvider.parse(parseContext).toAbsoluteRegion(new ExecutionContext(commandContext.getSource())),
             RegionArgument::getRegion,
             Region::expressAsString,
             Region.CODEC))

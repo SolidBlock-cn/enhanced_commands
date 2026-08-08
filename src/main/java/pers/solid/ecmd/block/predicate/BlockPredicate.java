@@ -122,10 +122,10 @@ public interface BlockPredicate extends ExpressionConvertible, RequiresValidatio
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext);
+  boolean test(BlockInWorld blockInWorld, ExecutionContext context);
 
-  default TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final boolean test = test(blockInWorld, executionContext);
+  default TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final boolean test = test(blockInWorld, context);
     return successOrFail(test, blockInWorld.getPos());
   }
 

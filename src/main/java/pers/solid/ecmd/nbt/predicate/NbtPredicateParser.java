@@ -291,7 +291,7 @@ public final class NbtPredicateParser {
       parseContext.clearSuggestion();
     }
     final NbtPredicate nbtPredicate = NbtPredicateParser.parseAfterOrdinalSign(parseContext, isUsingEqual);
-    return isNegated ? nbtPredicate.negate() : nbtPredicate;
+    return isNegated ? new NegatingNbtPredicate(nbtPredicate) : nbtPredicate;
   }
 
   private static <S> NbtPredicate parseAfterOrdinalSign(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
@@ -340,7 +340,7 @@ public final class NbtPredicateParser {
     } else if (reader.peek() == '!') {
       reader.skip();
       reader.skipWhitespace();
-      return parseUnit(parseContext, isUsingEqual).negate();
+      return new NegatingNbtPredicate(parseUnit(parseContext, isUsingEqual));
     } else {
       // 先尝试读取 NumberRange
       final int cursorBeforeRange = reader.getCursor();

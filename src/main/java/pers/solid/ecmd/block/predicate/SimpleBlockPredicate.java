@@ -43,7 +43,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     if (!blockInWorld.getState().is(block))
       return false;
     for (PropertyPredicate<?> propertyPredicate : properties) {
@@ -54,7 +54,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     boolean matches = true;
     final BlockState blockState = blockInWorld.getState();
     final List<Component> messages = new ArrayList<>();

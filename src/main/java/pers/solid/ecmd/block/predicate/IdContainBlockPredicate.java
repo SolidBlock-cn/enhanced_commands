@@ -29,12 +29,12 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     return pattern.matcher(BuiltInRegistries.BLOCK.getKey(blockInWorld.getState().getBlock()).toString()).find();
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final String id = BuiltInRegistries.BLOCK.getKey(blockInWorld.getState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).find();
     return TestResult.of(matches, Component.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Component.literal(pattern.toString()).withStyle(Styles.EXPECTED), Component.literal(id).withStyle(Styles.ACTUAL)));

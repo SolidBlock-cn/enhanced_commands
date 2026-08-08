@@ -24,14 +24,14 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    return (blockPredicate1.test(blockInWorld, executionContext) == blockPredicate2.test(blockInWorld, executionContext)) == same;
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
+    return (blockPredicate1.test(blockInWorld, context) == blockPredicate2.test(blockInWorld, context)) == same;
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final TestResult testResult1 = blockPredicate1.testAndDescribe(blockInWorld, executionContext);
-    final TestResult testResult2 = blockPredicate2.testAndDescribe(blockInWorld, executionContext);
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
+    final TestResult testResult1 = blockPredicate1.testAndDescribe(blockInWorld, context);
+    final TestResult testResult2 = blockPredicate2.testAndDescribe(blockInWorld, context);
     final boolean actual = testResult1.successes() == testResult2.successes();
     final boolean result = actual == same;
     final String passOfFail = result ? "pass" : "fail";

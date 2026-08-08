@@ -31,20 +31,20 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockEntity blockEntity = blockInWorld.getEntity();
-    return blockEntity != null && nbtPredicate.test(blockEntity.saveWithoutMetadata(blockInWorld.getLevel().registryAccess()));
+    return blockEntity != null && nbtPredicate.test(blockEntity.saveWithoutMetadata(blockInWorld.getLevel().registryAccess()), context);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final BlockEntity blockEntity = blockInWorld.getEntity();
     final MutableComponent nameText = blockInWorld.getState().getBlock().getName();
     final MutableComponent posText = TextUtil.wrapVector(blockInWorld.getPos());
     final RegistryAccess registryManager = blockInWorld.getLevel().registryAccess();
     if (blockEntity == null) {
       return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
-    } else if (nbtPredicate.test(blockEntity.saveWithoutMetadata(registryManager))) {
+    } else if (nbtPredicate.test(blockEntity.saveWithoutMetadata(registryManager), context)) {
       return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.nbt.pass", nameText, posText));
     } else {
       return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.nbt.fail"));

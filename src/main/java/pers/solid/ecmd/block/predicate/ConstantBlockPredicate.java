@@ -39,12 +39,12 @@ public enum ConstantBlockPredicate implements BlockPredicate, DoesNotRequireVali
   }
 
   @Override
-  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext context) {
     return value;
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     if (value) {
       return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.constant.pass"));
     } else {

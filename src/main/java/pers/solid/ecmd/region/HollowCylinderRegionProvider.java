@@ -2,7 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -13,8 +13,8 @@ public record HollowCylinderRegionProvider(OutlineType outlineType, CylinderRegi
       .apply(i, HollowCylinderRegionProvider::new));
 
   @Override
-  public HollowCylinderRegion toAbsoluteRegion(PositionProvider positionProvider) {
-    return new HollowCylinderRegion(outlineType, region.toAbsoluteRegion(positionProvider));
+  public HollowCylinderRegion toAbsoluteRegion(ExecutionContext context) {
+    return new HollowCylinderRegion(outlineType, region.toAbsoluteRegion(context));
   }
 
   @Override
