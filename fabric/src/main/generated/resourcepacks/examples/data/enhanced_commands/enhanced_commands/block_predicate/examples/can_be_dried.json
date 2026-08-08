@@ -1,0 +1,17 @@
+{
+  "type": "test_block_function_result",
+  "predicate": {
+    "type": "property_names",
+    "properties": [
+      {
+        "type": "comparison",
+        "comparator": "=",
+        "property": "waterlogged",
+        "value": "false"
+      }
+    ]
+  },
+  "try_apply": {
+    "type": "dry"
+  }
+}

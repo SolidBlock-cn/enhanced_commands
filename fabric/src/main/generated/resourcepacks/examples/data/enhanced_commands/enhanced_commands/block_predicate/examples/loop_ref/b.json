@@ -1,6 +1,10 @@
 {
-  "type": "test_block_function",
-  "block_function": {
+  "type": "test_block_function_result",
+  "predicate": {
+    "type": "reference",
+    "reference": "enhanced_commands:examples/correct_ref/c"
+  },
+  "try_apply": {
     "type": "reference",
     "reference": "examples/loop_ref/a"
   }
