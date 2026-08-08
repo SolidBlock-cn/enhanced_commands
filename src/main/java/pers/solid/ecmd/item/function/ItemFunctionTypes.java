@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.parse.SimpleListFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class ItemFunctionTypes {
@@ -44,8 +45,8 @@ public final class ItemFunctionTypes {
   private static void registerFunctions() {
     final FunctionsParser<ItemFunction> functionsParser = ItemFunctionParsing.FUNCTIONS_PARSER;
     functionsParser.register("enchant", Component.translatable("enhanced_commands.item_function.enchant"), EnchantItemFunction.Parser::new);
-    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayItemFunction.Parser::new);
+    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), () -> new SimpleListFunctionParser<>(ItemFunction::parse, OverlayItemFunction::new));
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickItemFunction.Parser::new);
-    functionsParser.register("reference", Component.translatable("enhanced_commands.function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.PREFIXED_ID_PARSER));
+    functionsParser.register("reference", Component.translatable("enhanced_commands.item_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.PREFIXED_ID_PARSER));
   }
 }

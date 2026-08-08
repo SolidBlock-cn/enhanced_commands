@@ -36,15 +36,15 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext context) {
     final TestResult testResult = predicate.testAndDescribe(blockInWorld, context);
     if (testResult.successes()) {
-      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
+      return TestResult.of(false, Component.translatable("enhanced_commands.predicate.not.fail"), List.of(testResult));
     } else {
-      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.negation.pass"), List.of(testResult));
+      return TestResult.of(true, Component.translatable("enhanced_commands.predicate.not.pass"), List.of(testResult));
     }
   }
 
   @Override
   public BlockPredicateType<NegatingBlockPredicate> getType() {
-    return BlockPredicateTypes.NEGATING;
+    return BlockPredicateTypes.NOT;
   }
 
   @Override
@@ -57,7 +57,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
 
     @Override
     public @Nullable BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.predicate.not"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
       final StringReader reader = parseContext.reader();

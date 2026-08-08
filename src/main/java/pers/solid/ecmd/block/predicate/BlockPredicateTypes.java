@@ -7,6 +7,8 @@ import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.SimpleListFunctionParser;
+import pers.solid.ecmd.parse.SimpleOneArgFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class BlockPredicateTypes {
@@ -25,7 +27,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<IdContainBlockPredicate> ID_CONTAIN = register("id_contain", IdContainBlockPredicate.CODEC);
   public static final BlockPredicateType<LootConditionBlockPredicate> LOOT_CONDITION = register("loot_condition", LootConditionBlockPredicate.CODEC);
   public static final BlockPredicateType<NbtBlockPredicate> NBT = register("nbt", NbtBlockPredicate.CODEC, NbtBlockPredicate.NbtParser.INSTANCE);
-  public static final BlockPredicateType<NegatingBlockPredicate> NEGATING = register("negating", NegatingBlockPredicate.CODEC, NegatingBlockPredicate.NegationParser.INSTANCE);
+  public static final BlockPredicateType<NegatingBlockPredicate> NOT = register("not", NegatingBlockPredicate.CODEC, NegatingBlockPredicate.NegationParser.INSTANCE);
   public static final BlockPredicateType<NoiseBlockPredicate> NOISE = register("noise", NoiseBlockPredicate.CODEC);
   public static final BlockPredicateType<PropertiesNamesBlockPredicate> PROPERTY_NAMES = register("property_names", PropertiesNamesBlockPredicate.CODEC, PropertiesNamesBlockPredicate.PropertyNamesParser.INSTANCE);
   public static final BlockPredicateType<ProbabilityBlockPredicate> RAND = register("probability", ProbabilityBlockPredicate.CODEC);
@@ -53,14 +55,15 @@ public final class BlockPredicateTypes {
 
   private static void registerFunctions() {
     final FunctionsParser<BlockPredicate> functionsParser = BlockPredicateParsing.FUNCTIONS_PARSER;
-    functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllBlockPredicate.Parser::new);
-    functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyBlockPredicate.Parser::new);
+    functionsParser.register("all", SimpleListFunctionParser.ALL_PREDICATE_DESCRIPTION, () -> new SimpleListFunctionParser<>(BlockPredicate::parse, AllBlockPredicate::new));
+    functionsParser.register("any", SimpleListFunctionParser.ANY_PREDICATE_DESCRIPTION, () -> new SimpleListFunctionParser<>(BlockPredicate::parse, AnyBlockPredicate::new));
     functionsParser.register("block-function-result", Component.translatable("enhanced_commands.block_predicate.block_function_result"), BlockFunctionResultBlockPredicate.Parser::new);
     functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"), CheckerboardBlockPredicate.Parser::new);
     functionsParser.register("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), () -> new BiPredicateBlockPredicate.Parser(false));
     functionsParser.register("expose", Component.translatable("enhanced_commands.block_predicate.expose"), ExposeBlockPredicate.Parser::new);
     functionsParser.register("idcontain", Component.translatable("enhanced_commands.block_predicate.id_contain"), IdContainBlockPredicate.Parser::new);
     functionsParser.register("noise", Component.translatable("enhanced_commands.block_predicate.noise"), NoiseBlockPredicate.Parser::new);
+    functionsParser.register("not", SimpleOneArgFunctionParser.NOT_PREDICATE_DESCRIPTION, () -> new SimpleOneArgFunctionParser<>(BlockPredicate::parse, NegatingBlockPredicate::new));
     functionsParser.register("predicate", Component.translatable("enhanced_commands.block_predicate.loot_condition"), LootConditionBlockPredicate.Parser::new);
     functionsParser.register("probability", Component.translatable("enhanced_commands.block_predicate.probability"), ProbabilityBlockPredicate.Parser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.block_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockPredicate.PREFIXED_ID_PARSER));

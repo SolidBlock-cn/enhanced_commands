@@ -64,7 +64,7 @@ public final class ItemFunctionParser {
   private ItemFunctionParser() {
   }
 
-  public static ItemFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  public static ItemFunction parseItemFunction(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parsePick(parseContext);
   }
 
@@ -112,7 +112,7 @@ public final class ItemFunctionParser {
     final HolderLookup.RegistryLookup<Item> itemLookup = parseContext.registries().lookupOrThrow(Registries.ITEM);
 
     final int cursorStart = reader.getCursor();
-    final @Nullable ItemFunction parseParentheses = ParsingUtil.parseParentheses(() -> parse(parseContext), parseContext);
+    final @Nullable ItemFunction parseParentheses = ParsingUtil.parseParentheses(() -> parseItemFunction(parseContext), parseContext);
     if (parseParentheses != null) {
       return parseParentheses;
     }
@@ -260,7 +260,7 @@ public final class ItemFunctionParser {
    * 语法：{@code "(" 物品函数 ")" | 函数式语法 | 组件名称 "=" 用 NBT 表示的值 | 组件名称 ":" NBT 函数}
    */
   private static <S> void parseComponentListEntry(ParseContext<S> parseContext, StringReader reader, Set<DataComponentType<?>> usedComponents, ImmutableList.Builder<ItemFunction> affiliates) throws CommandSyntaxException {
-    final @Nullable ItemFunction parenthesesParsed = ParsingUtil.parseParentheses(() -> parse(parseContext), parseContext);
+    final @Nullable ItemFunction parenthesesParsed = ParsingUtil.parseParentheses(() -> parseItemFunction(parseContext), parseContext);
     if (parenthesesParsed != null) {
       affiliates.add(parenthesesParsed);
       return;
@@ -353,7 +353,7 @@ public final class ItemFunctionParser {
    * 解析组件名称和冒号后的内容。只有当组件名称后是冒号时，才调用此方法解析后面的内容。会解析 NBT 函数，只有在实际应用物品函数时，此 NBT 函数才会被调用并用物品组件的 codec 解析。
    */
   private static <T, S> ModifyComponentItemFunction<T> parseValueForColonComponent(ParseContext<S> context, DataComponentType<T> componentType) throws CommandSyntaxException {
-    final NbtFunction nbtFunction = NbtFunction.parse(context, false, false);
+    final NbtFunction nbtFunction = NbtFunction.parse(context);
     return new ModifyComponentItemFunction<>(componentType, nbtFunction);
   }
 

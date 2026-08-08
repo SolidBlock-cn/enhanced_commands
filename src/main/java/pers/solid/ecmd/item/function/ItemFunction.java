@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.pack.RequiresValidation;
@@ -19,4 +20,8 @@ public interface ItemFunction extends ExpressionConvertible, RequiresValidation 
   ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException;
 
   ItemFunctionType<?> getType();
+
+  static ItemFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ItemFunctionParser.parseItemFunction(parseContext);
+  }
 }

@@ -61,7 +61,7 @@ public record PickNbtFunction(WeightedList<NbtFunction> functions) implements Nb
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final WeightedListParser<NbtFunction> weightedListParser = WeightedListParser.of((parseContext1) -> NbtFunction.parse(parseContext, false, false));
+      final WeightedListParser<NbtFunction> weightedListParser = WeightedListParser.of((parseContext1) -> NbtFunction.parse(parseContext));
       weightedList = weightedListParser.parse(parseContext);
     }
   }

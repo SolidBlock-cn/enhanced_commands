@@ -6,6 +6,9 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.parse.SimpleListFunctionParser;
+import pers.solid.ecmd.parse.SimpleOneArgFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public class NbtPredicateTypes {
@@ -21,7 +24,7 @@ public class NbtPredicateTypes {
   public static final NbtPredicateType<MatchCompoundNbtPredicate> MATCH_COMPOUND = register("match_compound", MatchCompoundNbtPredicate.CODEC);
   public static final NbtPredicateType<MatchListNbtPredicate> MATCH_LIST = register("match_list", MatchListNbtPredicate.CODEC);
   public static final NbtPredicateType<MatchPrimitiveNbtPredicate> MATCH_PRIMITIVE = register("match_primitive", MatchPrimitiveNbtPredicate.CODEC);
-  public static final NbtPredicateType<NegatingNbtPredicate> NEGATING = register("negating", NegatingNbtPredicate.CODEC);
+  public static final NbtPredicateType<NegatingNbtPredicate> NOT = register("not", NegatingNbtPredicate.CODEC);
   public static final NbtPredicateType<RangeNbtPredicate> RANGE = register("exhaustion", RangeNbtPredicate.CODEC);
   public static final NbtPredicateType<RegexNbtPredicate> REGEX = register("regex", RegexNbtPredicate.CODEC);
 
@@ -45,9 +48,10 @@ public class NbtPredicateTypes {
 
   private static void registerFunctions() {
     final FunctionsParser<NbtPredicate> functionsParser = NbtPredicateParsing.FUNCTIONS_PARSER;
-    functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllNbtPredicate.Parser::new);
-    functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyNbtPredicate.Parser::new);
+    functionsParser.register("all", SimpleListFunctionParser.ALL_PREDICATE_DESCRIPTION, () -> new SimpleListFunctionParser<>(NbtPredicate::parse, AllNbtPredicate::new));
+    functionsParser.register("any", SimpleListFunctionParser.ANY_PREDICATE_DESCRIPTION, () -> new SimpleListFunctionParser<>(NbtPredicate::parse, AnyNbtPredicate::new));
+    functionsParser.register("not", SimpleOneArgFunctionParser.NOT_PREDICATE_DESCRIPTION, () -> new SimpleOneArgFunctionParser<>(NbtPredicate::parse, NegatingNbtPredicate::new));
     functionsParser.register("reference", Component.translatable("enhanced_commands.nbt_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceNbtPredicate.PREFIXED_ID_PARSER));
-    functionsParser.register("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"), RegexNbtPredicate.Parser::new);
+    functionsParser.register("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"), () -> new SimpleOneArgFunctionParser<>(input -> ParsingUtil.readRegex(input.reader()), RegexNbtPredicate::new));
   }
 }

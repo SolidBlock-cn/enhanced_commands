@@ -129,7 +129,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Component.literal(s).withStyle(Styles.RESULT)), false);
               final NbtPredicate reparsedPredicate = NbtPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Component.literal(reparsedPredicate.asString(false)).withStyle(Styles.RESULT)), false);
-              final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
+              final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true));
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Component.literal(reparsedFunction.expressAsString()).withStyle(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement, new ExecutionContext(source));
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
@@ -472,7 +472,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             commandBuildContext,
             "nbt_function",
             NbtFunctionArgument.element(commandBuildContext),
-            parseContext -> NbtFunction.parse(parseContext, false, false),
+            parseContext -> NbtFunction.parse(parseContext),
             NbtFunctionArgument::getNbtFunction,
             NbtFunction::expressAsString,
             NbtFunction.CODEC))

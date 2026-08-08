@@ -1,10 +1,7 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
@@ -22,8 +19,8 @@ public interface NbtPredicate extends ExpressionConvertible, RequiresValidation 
   Codec<NbtPredicate> CODEC = NbtPredicateType.CODEC.dispatch(NbtPredicate::getType, NbtPredicateType::codec);
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
-  static NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
-    return NbtPredicateParser.parseNbtPredicate(new ParseContext<>(commandBuildContext, new StringReader(s), false, true), false, false);
+  static <S> NbtPredicate parse(ParseContext<S> parseContext) throws CommandSyntaxException {
+    return parse(parseContext, false, false);
   }
 
   static <S> NbtPredicate parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {

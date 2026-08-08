@@ -7,6 +7,7 @@ import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.SimpleListFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 /**
@@ -72,13 +73,13 @@ public final class BlockFunctionTypes {
     final FunctionsParser<BlockFunction> functionsParser = BlockFunctionParsing.FUNCTIONS_PARSER;
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickBlockFunction.Parser::new);
     functionsParser.register("dry", Component.translatable("enhanced_commands.block_function.dry"), DryBlockFunction.Parser::new);
-    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayBlockFunction.Parser::new);
+    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), () -> new SimpleListFunctionParser<>(BlockFunction::parse, OverlayBlockFunction::new));
     functionsParser.register("filter", Component.translatable("enhanced_commands.block_function.filter"), FilterBlockFunction.Parser::new);
-    functionsParser.register("idcontain", Component.translatable("enhanced_commands.block_function.id_contain"), IdContainBlockFunction.Parser::new);
+    functionsParser.register("id-contain", Component.translatable("enhanced_commands.block_function.id_contain"), IdContainBlockFunction.Parser::new);
     functionsParser.register("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"), StonecutBlockFunction.Parser::new);
     functionsParser.register("if", Component.translatable("enhanced_commands.block_function.conditional"), ConditionalBlockFunction.Parser::new);
     functionsParser.register("ifs", Component.translatable("enhanced_commands.block_function.conditions"), ConditionsBlockFunction.Parser::new);
-    functionsParser.register("idreplace", Component.translatable("enhanced_commands.block_function.id_replace"), IdReplaceBlockFunction.Parser::new);
+    functionsParser.register("id-replace", Component.translatable("enhanced_commands.block_function.id_replace"), IdReplaceBlockFunction.Parser::new);
     functionsParser.register("postprocess", Component.translatable("enhanced_commands.block_function.post_process"), PostProcessBlockFunction.Parser::new);
     functionsParser.register("random", Component.translatable("enhanced_commands.block_function.random"), RandomBlockFunction.RandFuncParser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.block_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockFunction.PREFIXED_ID_PARSER));

@@ -125,7 +125,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
           parseContext.addSuggestion((context, builder) -> ParsingUtil.suggestBoolean(builder));
           lenient = parseContext.reader().readBoolean();
         }
-        case "original" -> original = NbtFunction.parse(parseContext, false, false);
+        case "original" -> original = NbtFunction.parse(parseContext);
       }
     }
   }
