@@ -88,17 +88,19 @@ public interface ExamplePackDataGenerations {
       )));
       context.add(of("can_be_dried"), new BlockFunctionResultBlockPredicate(
           new DryBlockFunction(),
-          new PropertiesNamesBlockPredicate(new ComparisonPropertyNamePredicate("waterlogged", Comparator.EQ, "false"))
+          new NegatingBlockPredicate(new PropertiesNamesBlockPredicate(new ComparisonPropertyNamePredicate("waterlogged", Comparator.EQ, "true")))
       ));
 
       context.add(of("correct_ref/a"), new ProbabilityBlockPredicate(0.4f, ConstantBlockPredicate.ALWAYS_TRUE, OptionalLong.empty()));
-      context.add(of("correct_ref_b"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/a"))));
-      context.add(of("correct_ref_c"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/b"))));
+      context.add(of("correct_ref/b"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/a"))));
+      context.add(of("correct_ref/c"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(ForBlockPredicate.of("correct_ref/b"))));
 
       context.add(of("loop_ref/b"), new BlockFunctionResultBlockPredicate(
           new ReferenceBlockFunction(RegistryHelper.safeStandAloneHolderReference(ForBlockFunction.of("loop_ref/a"))),
           new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(of("correct_ref/c")))
       ));
+
+      context.add(of("absent_ref"), new ReferenceBlockPredicate(RegistryHelper.safeStandAloneHolderReference(of("absent_ref/123"))));
     }
   }
 

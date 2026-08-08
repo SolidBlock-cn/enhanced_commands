@@ -55,6 +55,7 @@ public final class BlockPredicateTypes {
     final FunctionsParser<BlockPredicate> functionsParser = BlockPredicateParsing.FUNCTIONS_PARSER;
     functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllBlockPredicate.Parser::new);
     functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyBlockPredicate.Parser::new);
+    functionsParser.register("block-function-result", Component.translatable("enhanced_commands.block_predicate.block_function_result"), BlockFunctionResultBlockPredicate.Parser::new);
     functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"), CheckerboardBlockPredicate.Parser::new);
     functionsParser.register("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), () -> new BiPredicateBlockPredicate.Parser(false));
     functionsParser.register("expose", Component.translatable("enhanced_commands.block_predicate.expose"), ExposeBlockPredicate.Parser::new);

@@ -55,9 +55,9 @@ public final class NbtFunctionTypes {
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickNbtFunction.Parser::new);
     functionsParser.register("pos", Component.translatable("enhanced_commands.nbt_function.pos"), PosNbtFunction.Parser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.nbt_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceNbtFunction.PREFIXED_ID_PARSER));
-    functionsParser.register("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"), RegexReplaceNbtFunction.Parser::new);
+    functionsParser.register("regex-replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"), RegexReplaceNbtFunction.Parser::new);
     functionsParser.register("replace", Component.translatable("enhanced_commands.nbt_function.replace"), ReplaceNbtFunction.Parser::new);
-    functionsParser.register("string_replace", Component.translatable("enhanced_commands.nbt_function.string_replace"), StringReplaceNbtFunction.Parser::new);
+    functionsParser.register("string-replace", Component.translatable("enhanced_commands.nbt_function.string_replace"), StringReplaceNbtFunction.Parser::new);
     functionsParser.register("substring", Component.translatable("enhanced_commands.nbt_function.substring"), SubstringNbtFunction.Parser::new);
   }
 }
