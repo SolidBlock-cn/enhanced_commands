@@ -30,7 +30,7 @@ public record IdReplaceItemFunction(Pattern pattern, String replacement) impleme
       return itemStack;
     }
     final Level world = context.positionProvider.getWorld$ec();
-    return world.registryAccess().registryOrThrow(Registries.ITEM).getOptional(identifier).filter(item1 -> item1.isEnabled(world.enabledFeatures())).map(replacedItem -> new ItemStack(Holder.direct(replacedItem), itemStack.getCount(), itemStack.getComponentsPatch())).orElse(itemStack);
+    return world.registryAccess().lookupOrThrow(Registries.ITEM).getOptional(identifier).filter(item1 -> item1.isEnabled(world.enabledFeatures())).map(replacedItem -> new ItemStack(Holder.direct(replacedItem), itemStack.getCount(), itemStack.getComponentsPatch())).orElse(itemStack);
   }
 
   @Override

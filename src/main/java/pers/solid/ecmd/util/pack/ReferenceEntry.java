@@ -72,7 +72,7 @@ public interface ReferenceEntry<E> extends RequiresValidation {
     final Holder.Reference<E> reference = reference();
     if (!context.isElementReferenced(reference.key())) {
       final ValidationContext newContext = context.forReferencedElement(reference.key());
-      final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
+      final Optional<? extends HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
       if (optionalLookup.isEmpty()) {
         return;
       }
