@@ -1,0 +1,10 @@
+{
+  "type": "conditional",
+  "condition": {
+    "type": "reference",
+    "reference": "enhanced_commands:examples/loop_ref/b"
+  },
+  "then": {
+    "type": "empty"
+  }
+}

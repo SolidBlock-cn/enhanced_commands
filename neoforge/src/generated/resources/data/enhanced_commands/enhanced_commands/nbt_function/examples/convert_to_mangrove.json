@@ -1,7 +1,0 @@
-{
-  "type": "regex_replace",
-  "lenient": true,
-  "pattern": "(dark_oak|pale_oak|oak|spruce|jungle|acacia)",
-  "recursive": true,
-  "replacement": "mangrove"
-}

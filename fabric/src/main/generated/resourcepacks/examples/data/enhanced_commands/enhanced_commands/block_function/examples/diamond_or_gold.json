@@ -1,0 +1,8 @@
+{
+  "type": "pick",
+  "elements": [
+    "minecraft:diamond_block",
+    "minecraft:gold_block"
+  ],
+  "weighted": false
+}

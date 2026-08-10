@@ -1,0 +1,23 @@
+{
+  "type": "all",
+  "predicates": [
+    {
+      "type": "id_contain",
+      "pattern": "oak"
+    },
+    {
+      "type": "not",
+      "predicate": {
+        "type": "id_contain",
+        "pattern": "dark_oak"
+      }
+    },
+    {
+      "type": "not",
+      "predicate": {
+        "type": "id_contain",
+        "pattern": "pale_oak"
+      }
+    }
+  ]
+}
