@@ -1,14 +1,18 @@
 package pers.solid.ecmd.mixins.general;
 
 import com.google.common.base.Predicates;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.Util;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -37,6 +41,7 @@ import java.util.function.Predicate;
 
 @Mixin(ItemPredicateArgument.class)
 public abstract class ItemPredicateArgumentMixin {
+
   /**
    * 修改 {@link ItemPredicateArgument#PSEUDO_COMPONENTS} 中的参数使之支持序列化。
    */
@@ -51,6 +56,33 @@ public abstract class ItemPredicateArgumentMixin {
   @ModifyReturnValue(method = "method_58529", at = @At("RETURN"))
   private static Predicate<ItemStack> modifyPseudoPredicatesArg(Predicate<ItemStack> original, @Local(argsOnly = true) MinMaxBounds.Ints count) {
     return ItemPredicate.asVanillaPredicate(new CountItemPredicate(count), original);
+  }
+
+  /**
+   * 处理一下 parse 的结果，当 {@code vanillaPredicate} 包含了模组中的物品谓词数据时，将原先的返回值由 {@code vanillaPredicate::test} 转化为 {@code new ItemPredicateResultContainer(vanillaPredicate::test, modItemPredicate)}。在调用 getItemPredicate 时，会为此 container 写入 source（{@link CommandSourceStack}）。
+   * <br>第一部分：存储这个原版的 {@code Predicate<ItemStack>} 对象（因为它实际上在字节码中没有存储为局部变量），第二部分：实际修改返回值。
+   */
+  @ModifyExpressionValue(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/item/ItemPredicateArgument$Result;", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;allOf(Ljava/util/List;)Ljava/util/function/Predicate;"))
+  private Predicate<ItemStack> addSourceInfoInParseResultP1(Predicate<ItemStack> original, @Share("vanillaPredicate") LocalRef<Predicate<ItemStack>> vanillaPredicate) {
+    vanillaPredicate.set(original);
+    return original;
+  }
+
+  @ModifyReturnValue(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/item/ItemPredicateArgument$Result;", at = @At("RETURN"))
+  private ItemPredicateArgument.Result addSourceInfoInParseResultP2(ItemPredicateArgument.Result original, @Share("vanillaPredicate") LocalRef<Predicate<ItemStack>> vanillaPredicate) {
+    final ItemPredicate itemPredicate = ItemPredicate.convertOrUnknown(vanillaPredicate.get());
+    if (!(itemPredicate instanceof UnknownItemPredicate)) {
+      return new ItemPredicateResultSourceContainer(original, itemPredicate);
+    }
+    return original;
+  }
+
+  @ModifyReturnValue(method = "getItemPredicate", at = @At("RETURN"))
+  private static ItemPredicateArgument.Result storeSourceWhenGettingItemPredicate(ItemPredicateArgument.Result original, @Local(argsOnly = true) CommandContext<CommandSourceStack> context) {
+    if (original instanceof ItemPredicateResultSourceContainer container) {
+      container.setSource(context.getSource());
+    }
+    return original;
   }
 
   /**

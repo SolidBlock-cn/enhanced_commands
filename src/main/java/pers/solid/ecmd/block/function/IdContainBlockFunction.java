@@ -59,7 +59,7 @@ public final class IdContainBlockFunction implements BlockFunction, DoesNotRequi
 
   @Override
   public String expressAsString() {
-    return "idcontain(" + StringTag.quoteAndEscape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
+    return "id-contain(" + StringTag.quoteAndEscape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
   }
 
   @Override
@@ -84,7 +84,7 @@ public final class IdContainBlockFunction implements BlockFunction, DoesNotRequi
     if (!(o instanceof IdContainBlockFunction that))
       return false;
 
-    return pattern.pattern().equals(that.pattern.pattern());
+    return pattern.pattern().equals(that.pattern.pattern()) && this.seed.equals(that.seed);
   }
 
   @Override

@@ -39,7 +39,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   @Override
   public String expressAsString() {
-    return "regex_replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
+    return "regex-replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
   }
 
   @Override
