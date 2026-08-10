@@ -24,6 +24,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.DoesNotRequireValidation;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
 /**
@@ -54,7 +55,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
 
   @Override
   public String expressAsString() {
-    return "idreplace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ")";
+    return "id-replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ")";
   }
 
   @Override
@@ -72,18 +73,21 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     return BlockFunctionTypes.ID_REPLACE;
   }
 
-  public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {
+  public static class Parser<R> implements FunctionContentParser.SequentialParams<R> {
     private @Nullable Pattern pattern;
     private @Nullable String replacement;
 
-    public Parser() {
+    private final BiFunction<Pattern, String, R> resultProvider;
+
+    public Parser(BiFunction<Pattern, String, R> resultProvider) {
+      this.resultProvider = resultProvider;
     }
 
     @Override
-    public IdReplaceBlockFunction getParseResult(ParseContext<?> parseContext) {
+    public R getParseResult(ParseContext<?> parseContext) {
       Objects.requireNonNull(pattern, "pattern");
       Objects.requireNonNull(replacement, "replacement");
-      return new IdReplaceBlockFunction(pattern, replacement);
+      return resultProvider.apply(pattern, replacement);
     }
 
     @Override

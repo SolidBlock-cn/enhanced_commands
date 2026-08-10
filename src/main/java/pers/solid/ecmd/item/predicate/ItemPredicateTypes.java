@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.parse.SimpleListFunctionParser;
 import pers.solid.ecmd.parse.SimpleOneArgFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
@@ -19,7 +20,8 @@ public final class ItemPredicateTypes {
   public static final ItemPredicateType<ComponentValueCheckItemPredicate<?>> COMPONENT_VALUE_CHECK = register("component_value_check", ComponentValueCheckItemPredicate.CODEC);
   public static final ItemPredicateType<ConstantItemPredicate> CONSTANT = register("constant", ConstantItemPredicate.CODEC);
   public static final ItemPredicateType<CountItemPredicate> COUNT = register("count", CountItemPredicate.CODEC);
-  public static final ItemPredicateType<ItemComponentCombinationItemPredicate> SIMPLE_COMBINATION = register("item_component_combination", ItemComponentCombinationItemPredicate.CODEC);
+  public static final ItemPredicateType<ItemComponentCombinationItemPredicate> ITEM_COMPONENT_COMBINATION = register("item_component_combination", ItemComponentCombinationItemPredicate.CODEC);
+  public static final ItemPredicateType<IdContainItemPredicate> ID_CONTAIN = register("id_contain", IdContainItemPredicate.CODEC);
   public static final ItemPredicateType<NegatingItemPredicate> NOT = register("not", NegatingItemPredicate.CODEC);
   public static final ItemPredicateType<ProbabilityItemPredicate> PROBABILITY = register("probability", ProbabilityItemPredicate.CODEC);
   public static final ItemPredicateType<ReferenceItemPredicate> REFERENCE = register("reference", ReferenceItemPredicate.CODEC);
@@ -49,6 +51,7 @@ public final class ItemPredicateTypes {
     functionsParser.register("all", Component.translatable("enhanced_commands.item_predicate.all"), () -> new SimpleListFunctionParser<>(ItemPredicate::parse, AllItemPredicate::new));
     functionsParser.register("any", Component.translatable("enhanced_commands.item_predicate.any"), () -> new SimpleListFunctionParser<>(ItemPredicate::parse, AnyItemPredicate::new));
     functionsParser.register("count", Component.translatable("enhanced_commands.item_predicate.count"), CountItemPredicate.Parser::new);
+    functionsParser.register("id-contain", Component.translatable("enhanced_commands.item_predicate.id_contain"), () -> new SimpleOneArgFunctionParser<>(input -> ParsingUtil.readRegex(input.reader()), IdContainItemPredicate::new));
     functionsParser.register("not", SimpleOneArgFunctionParser.NOT_PREDICATE_DESCRIPTION, () -> new SimpleOneArgFunctionParser<>(ItemPredicate::parse, NegatingItemPredicate::new));
     functionsParser.register("probability", Component.translatable("enhanced_commands.item_predicate.probability"), ProbabilityItemPredicate.Parser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.item_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemPredicate.PREFIXED_ID_PARSER));

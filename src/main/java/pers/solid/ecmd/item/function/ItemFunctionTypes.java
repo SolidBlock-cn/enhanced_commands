@@ -5,8 +5,11 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
+import pers.solid.ecmd.block.function.IdReplaceBlockFunction;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.parse.SimpleListFunctionParser;
+import pers.solid.ecmd.parse.SimpleOneArgFunctionParser;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class ItemFunctionTypes {
@@ -14,6 +17,8 @@ public final class ItemFunctionTypes {
 
   public static final ItemFunctionType<EmptyItemFunction> EMPTY = register("empty", EmptyItemFunction.CODEC);
   public static final ItemFunctionType<EnchantItemFunction> ENCHANT = register("enchant", EnchantItemFunction.CODEC);
+  public static final ItemFunctionType<IdContainItemFunction> ID_CONTAIN = register("id_contain", IdContainItemFunction.CODEC);
+  public static final ItemFunctionType<IdReplaceItemFunction> ID_REPLACE = register("id_replace", IdReplaceItemFunction.CODEC);
   public static final ItemFunctionType<ItemComponentCombinationItemFunction> ITEM_COMPONENT_COMBINATION = register("item_component_combination", ItemComponentCombinationItemFunction.CODEC);
   public static final ItemFunctionType<ModifyComponentItemFunction<?>> MODIFY_COMPONENT = register("modify_component", ModifyComponentItemFunction.CODEC);
   public static final ItemFunctionType<OverlayItemFunction> OVERLAY = register("overlay", OverlayItemFunction.CODEC);
@@ -45,6 +50,8 @@ public final class ItemFunctionTypes {
   private static void registerFunctions() {
     final FunctionsParser<ItemFunction> functionsParser = ItemFunctionParsing.FUNCTIONS_PARSER;
     functionsParser.register("enchant", Component.translatable("enhanced_commands.item_function.enchant"), EnchantItemFunction.Parser::new);
+    functionsParser.register("id-contain", Component.translatable("enhanced_commands.item_function.id_contain"), () -> new SimpleOneArgFunctionParser<>(input -> ParsingUtil.readRegex(input.reader()), IdContainItemFunction::new));
+    functionsParser.register("id-replace", Component.translatable("enhanced_commands.item_function.id_replace"), () -> new IdReplaceBlockFunction.Parser<>(IdReplaceItemFunction::new));
     functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), () -> new SimpleListFunctionParser<>(ItemFunction::parse, OverlayItemFunction::new));
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickItemFunction.Parser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.item_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.PREFIXED_ID_PARSER));

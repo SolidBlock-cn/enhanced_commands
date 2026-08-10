@@ -5,10 +5,7 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionsParser;
-import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.parse.SimpleListFunctionParser;
-import pers.solid.ecmd.parse.SimpleOneArgFunctionParser;
+import pers.solid.ecmd.parse.*;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class BlockPredicateTypes {
@@ -61,7 +58,7 @@ public final class BlockPredicateTypes {
     functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"), CheckerboardBlockPredicate.Parser::new);
     functionsParser.register("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), () -> new BiPredicateBlockPredicate.Parser(false));
     functionsParser.register("expose", Component.translatable("enhanced_commands.block_predicate.expose"), ExposeBlockPredicate.Parser::new);
-    functionsParser.register("id-contain", Component.translatable("enhanced_commands.block_predicate.id_contain"), IdContainBlockPredicate.Parser::new);
+    functionsParser.register("id-contain", Component.translatable("enhanced_commands.block_predicate.id_contain"), () -> new SimpleOneArgFunctionParser<>(input -> ParsingUtil.readRegex(input.reader()), IdContainBlockPredicate::new));
     functionsParser.register("noise", Component.translatable("enhanced_commands.block_predicate.noise"), NoiseBlockPredicate.Parser::new);
     functionsParser.register("not", SimpleOneArgFunctionParser.NOT_PREDICATE_DESCRIPTION, () -> new SimpleOneArgFunctionParser<>(BlockPredicate::parse, NegatingBlockPredicate::new));
     functionsParser.register("predicate", Component.translatable("enhanced_commands.block_predicate.loot_condition"), LootConditionBlockPredicate.Parser::new);

@@ -79,7 +79,7 @@ public final class BlockFunctionTypes {
     functionsParser.register("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"), StonecutBlockFunction.Parser::new);
     functionsParser.register("if", Component.translatable("enhanced_commands.block_function.conditional"), ConditionalBlockFunction.Parser::new);
     functionsParser.register("ifs", Component.translatable("enhanced_commands.block_function.conditions"), ConditionsBlockFunction.Parser::new);
-    functionsParser.register("id-replace", Component.translatable("enhanced_commands.block_function.id_replace"), IdReplaceBlockFunction.Parser::new);
+    functionsParser.register("id-replace", Component.translatable("enhanced_commands.block_function.id_replace"), () -> new IdReplaceBlockFunction.Parser<>(IdReplaceBlockFunction::new));
     functionsParser.register("postprocess", Component.translatable("enhanced_commands.block_function.post_process"), PostProcessBlockFunction.Parser::new);
     functionsParser.register("random", Component.translatable("enhanced_commands.block_function.random"), RandomBlockFunction.RandFuncParser::new);
     functionsParser.register("reference", Component.translatable("enhanced_commands.block_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockFunction.PREFIXED_ID_PARSER));

@@ -42,7 +42,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
 
   @Override
   public String expressAsString() {
-    return "string_replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
+    return "string-replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
   }
 
   @Override

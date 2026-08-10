@@ -94,7 +94,7 @@ public record ItemComponentCombinationItemPredicate(ItemPredicate base, List<Ite
 
   @Override
   public ItemPredicateType<ItemComponentCombinationItemPredicate> getType() {
-    return ItemPredicateTypes.SIMPLE_COMBINATION;
+    return ItemPredicateTypes.ITEM_COMPONENT_COMBINATION;
   }
 
   @Override
